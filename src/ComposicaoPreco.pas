@@ -3,13 +3,6 @@ unit ComposicaoPreco;
 interface
 
 type
-  TComposicaoPrecoResultado = record
-    AliquotaMarkup: double;
-    AliquotaLucro: double;
-    ValorPrecoSugerido: double;
-    Status: string;
-  end;
-
   TTipoCalculo = (tcSomar, tcDesconsiderar, tcSubtrair);
 
   IComposicaoPrecoAliquota = interface;
@@ -59,9 +52,13 @@ type
     function GetTipoCalculoValorOperacional(): TTipoCalculo;
     function GetValorOperacional(): double;
 
-    function CalcularPeloMarkup(pAliquotaMarkup: double): TComposicaoPrecoResultado;
-    function CalcularPeloLucro(pAliquotaLucro: double): TComposicaoPrecoResultado;
-    function CalcularPeloPrecoSugerido(pPrecoSugerido: double): TComposicaoPrecoResultado;
+    function ComCusto(const Value: double): IComposicaoPreco;
+    function GetCusto(): double;
+
+    function GetAliquotaLucro(): double;
+    function GetAliquotaMarkup(): double;
+
+    function Calcular(): double;
 
   end;
 
@@ -91,7 +88,11 @@ type
     FTipoCalculoAliquotaOutros: TTipoCalculo;
     FValorOperacional: double;
     FTipoCalculoValorOperacional: TTipoCalculo;
-    
+
+    FCusto: double;
+
+    function CalcularValorICMS(): Double; 
+
   protected
     procedure SetAliquotaCOFINS(const Value: Double);
     procedure SetAliquotaICMS(const Value: Double);
@@ -102,9 +103,10 @@ type
     procedure SetValorOperacional(const Value: Double);
 
   public
-    function CalcularPeloLucro(pAliquotaLucro: Double): TComposicaoPrecoResultado;
-    function CalcularPeloMarkup(pAliquotaMarkup: Double): TComposicaoPrecoResultado;
-    function CalcularPeloPrecoSugerido(pPrecoSugerido: Double): TComposicaoPrecoResultado;
+    constructor Create();
+
+    function Calcular(): double;
+    
     function DesconsiderarCOFINS: IComposicaoPreco;
     function DesconsiderarICMS: IComposicaoPreco;
     function DesconsiderarIPI: IComposicaoPreco;
@@ -127,6 +129,8 @@ type
     function SubtrairSubstituicaoTributaria: IComposicaoPrecoAliquota;
     function SubtrairValorOperacional: IComposicaoPrecoValor;
 
+    function ComCusto(const Value: double): IComposicaoPreco;
+
     function GetAliquotaCOFINS: Double;
     function GetAliquotaICMS: Double;
     function GetAliquotaIPI: Double;
@@ -134,6 +138,7 @@ type
     function GetAliquotaPIS: Double;
     function GetAliquotaSubstituicaoTributaria: Double;
     function GetValorOperacional: Double;
+    function GetCusto: Double;
 
     function GetTipoCalculoAliquotaICMS: TTipoCalculo;
     function GetTipoCalculoAliquotaCOFINS: TTipoCalculo;
@@ -142,6 +147,9 @@ type
     function GetTipoCalculoAliquotaPIS: TTipoCalculo;
     function GetTipoCalculoAliquotaSubstituicaoTributaria: TTipoCalculo;
     function GetTipoCalculoValorOperacional: TTipoCalculo;
+
+    function GetAliquotaLucro(): Double;
+    function GetAliquotaMarkup(): Double;
 
   end;
 
@@ -165,19 +173,58 @@ type
 
   end;
 
-function TComposicaoPreco.CalcularPeloLucro(pAliquotaLucro: Double): TComposicaoPrecoResultado;
+function TComposicaoPreco.Calcular: Double;
+var
+  lResultado: double;
 begin
-
+  lResultado := FCusto;
+  lResultado := lResultado + Self.CalcularValorICMS();
+  Result := lResultado;
 end;
 
-function TComposicaoPreco.CalcularPeloMarkup(pAliquotaMarkup: Double): TComposicaoPrecoResultado;
+function TComposicaoPreco.CalcularValorICMS: Double;
+var
+  lValorICMS: double;
 begin
+  if (FAliquotaICMS = 0) then
+  begin
+    Result := 0;
+    Exit;
+  end;
 
+  lValorICMS := FCusto * FAliquotaICMS / 100;
+  case FTipoCalculoAliquotaICMS of
+    tcSomar: Result := lValorICMS;
+    tcSubtrair: Result := -lValorICMS;
+  else
+    Result := 0;
+  end;
 end;
 
-function TComposicaoPreco.CalcularPeloPrecoSugerido(pPrecoSugerido: Double): TComposicaoPrecoResultado;
+function TComposicaoPreco.ComCusto(const Value: double): IComposicaoPreco;
 begin
+  FCusto := Value;
+  Result := Self;
+end;
 
+constructor TComposicaoPreco.Create;
+begin
+  FAliquotaICMS := 0;
+  FTipoCalculoAliquotaICMS := tcSomar;
+  FAliquotaIPI := 0;
+  FTipoCalculoAliquotaIPI := tcSomar;
+  FAliquotaCOFINS := 0;
+  FTipoCalculoAliquotaCOFINS := tcSomar;
+  FAliquotaPIS := 0;
+  FTipoCalculoAliquotaPIS := tcSomar;
+  FAliquotaSubstituicaoTributaria := 0;
+  FTipoCalculoAliquotaSubstituicaoTributaria := tcSomar;
+  FAliquotaOutros := 0;
+  FTipoCalculoAliquotaOutros := tcSomar;
+  FValorOperacional := 0;
+  FTipoCalculoValorOperacional := tcSomar;
+
+  FCusto := 0;
 end;
 
 function TComposicaoPreco.DesconsiderarCOFINS: IComposicaoPreco;
@@ -244,6 +291,16 @@ begin
   Result := FAliquotaIPI;
 end;
 
+function TComposicaoPreco.GetAliquotaLucro: Double;
+begin
+  Result := 0;
+end;
+
+function TComposicaoPreco.GetAliquotaMarkup: Double;
+begin
+  Result := 0;
+end;
+
 function TComposicaoPreco.GetAliquotaOutros: Double;
 begin
   Result := FAliquotaOutros;
@@ -257,6 +314,11 @@ end;
 function TComposicaoPreco.GetAliquotaSubstituicaoTributaria: Double;
 begin
   Result := FAliquotaSubstituicaoTributaria;
+end;
+
+function TComposicaoPreco.GetCusto: Double;
+begin
+  Result := FCusto;
 end;
 
 function TComposicaoPreco.GetTipoCalculoAliquotaCOFINS: TTipoCalculo;
