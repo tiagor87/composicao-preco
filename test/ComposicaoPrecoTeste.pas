@@ -44,7 +44,7 @@ type
     procedure DeveCalcularAliquotaMarkupZeroQuandoTodasAsAliquotasEstiveremZeradasECustoFor100();
     procedure DeveCalcularAliquotaLucroZeroQuandoTodasAsAliquotasEstiveremZeradasECustoFor100();
 
-    // Com ICMS
+    // Somente ICMS
     procedure DeveCalcularPrecoSugerido90QuandoSubtrairAliquotaICMSDe10ECustoFor100();
     procedure DeveCalcularPrecoSugerido180QuandoSubtrairAliquotaICMSDe10ECustoFor200();
     procedure DeveCalcularPrecoSugerido110QuandoSomarAliquotaICMSDe10ECustoFor100();
@@ -58,8 +58,8 @@ type
     procedure DeveCalcularAliquotaMarkupZeroQuandoDesconsiderarAliquotaICMSECustoFor100();
     procedure DeveCalcularAliquotaLucroZeroQuandoDesconsiderarAliquotaICMSECustoFor100();
 
-    // Com IPI
-    procedure DeveCalcularPrecoSugerido90QuandoSubtrairAliquotaIPODe10ECustoFor100();
+    // Somente IPI
+    procedure DeveCalcularPrecoSugerido90QuandoSubtrairAliquotaIPIDe10ECustoFor100();
     procedure DeveCalcularPrecoSugerido180QuandoSubtrairAliquotaIPIDe10ECustoFor200();
     procedure DeveCalcularPrecoSugerido110QuandoSomarAliquotaIPIDe10ECustoFor100();
     procedure DeveCalcularPrecoSugerido220QuandoSomarAliquotaIPIDe10ECustoFor200();
@@ -72,6 +72,19 @@ type
     procedure DeveCalcularAliquotaMarkupZeroQuandoDesconsiderarAliquotaIPIECustoFor100();
     procedure DeveCalcularAliquotaLucroZeroQuandoDesconsiderarAliquotaIPIECustoFor100();
 
+    // Somente PIS
+    procedure DeveCalcularPrecoSugerido90QuandoSubtrairAliquotaPISDe10ECustoFor100();
+    procedure DeveCalcularPrecoSugerido180QuandoSubtrairAliquotaPISDe10ECustoFor200();
+    procedure DeveCalcularPrecoSugerido110QuandoSomarAliquotaPISDe10ECustoFor100();
+    procedure DeveCalcularPrecoSugerido220QuandoSomarAliquotaPISDe10ECustoFor200();
+    procedure DeveCalcularPrecoSugerido100QuandoDesconsiderarAliquotaPISECustoFor100();
+
+    procedure DeveCalcularAliquotaMarkupZeroQuandoSubtrairAliquotaPISDe10ECustoFor100();
+    procedure DeveCalcularAliquotaLucroZeroQuandoSubtrairAliquotaPISDe10ECustoFor100();
+    procedure DeveCalcularAliquotaMarkupZeroQuandoSomarAliquotaPISDe10ECustoFor100();
+    procedure DeveCalcularAliquotaLucroZeroQuandoSomarAliquotaPISDe10ECustoFor100();
+    procedure DeveCalcularAliquotaMarkupZeroQuandoDesconsiderarAliquotaPISECustoFor100();
+    procedure DeveCalcularAliquotaLucroZeroQuandoDesconsiderarAliquotaPISECustoFor100();
 
   end;
 
@@ -511,12 +524,118 @@ begin
   CheckEquals(220, lResultado);
 end;
 
-procedure TComposicaoPrecoTeste.DeveCalcularPrecoSugerido90QuandoSubtrairAliquotaIPODe10ECustoFor100;
+procedure TComposicaoPrecoTeste.DeveCalcularPrecoSugerido90QuandoSubtrairAliquotaIPIDe10ECustoFor100;
 var
   lResultado: double;
 begin
   lResultado := FComposicaoPreco.ComCusto(100)
                                 .SubtrairIPI()
+                                .ComAliquota(10)
+                                .Calcular();
+  CheckEquals(90, lResultado);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaLucroZeroQuandoDesconsiderarAliquotaPISECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .DesconsiderarPIS()
+                  .Calcular();
+  CheckEquals(0, FComposicaoPreco.GetAliquotaLucro);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaLucroZeroQuandoSomarAliquotaPISDe10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .SomarPIS()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(0, FComposicaoPreco.GetAliquotaLucro);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaLucroZeroQuandoSubtrairAliquotaPISDe10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .SubtrairPIS()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(0, FComposicaoPreco.GetAliquotaLucro);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaMarkupZeroQuandoDesconsiderarAliquotaPISECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .DesconsiderarPIS()
+                  .Calcular();
+  CheckEquals(0, FComposicaoPreco.GetAliquotaMarkup);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaMarkupZeroQuandoSomarAliquotaPISDe10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .SomarPIS()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(0, FComposicaoPreco.GetAliquotaMarkup);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaMarkupZeroQuandoSubtrairAliquotaPISDe10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .SubtrairPIS()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(0, FComposicaoPreco.GetAliquotaMarkup);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularPrecoSugerido100QuandoDesconsiderarAliquotaPISECustoFor100;
+var
+  lResultado: double;
+begin
+  lResultado := FComposicaoPreco.ComCusto(100)
+                                .DesconsiderarPIS()
+                                .Calcular();
+  CheckEquals(100, lResultado);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularPrecoSugerido110QuandoSomarAliquotaPISDe10ECustoFor100;
+var
+  lResultado: double;
+begin
+  lResultado := FComposicaoPreco.ComCusto(100)
+                                .SomarPIS()
+                                .ComAliquota(10)
+                                .Calcular();
+  CheckEquals(110, lResultado);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularPrecoSugerido180QuandoSubtrairAliquotaPISDe10ECustoFor200;
+var
+  lResultado: double;
+begin
+  lResultado := FComposicaoPreco.ComCusto(200)
+                                .SubtrairPIS()
+                                .ComAliquota(10)
+                                .Calcular();
+  CheckEquals(180, lResultado);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularPrecoSugerido220QuandoSomarAliquotaPISDe10ECustoFor200;
+var
+  lResultado: double;
+begin
+  lResultado := FComposicaoPreco.ComCusto(200)
+                                .SomarPIS()
+                                .ComAliquota(10)
+                                .Calcular();
+  CheckEquals(220, lResultado);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularPrecoSugerido90QuandoSubtrairAliquotaPISDe10ECustoFor100;
+var
+  lResultado: double;
+begin
+  lResultado := FComposicaoPreco.ComCusto(100)
+                                .SubtrairPIS()
                                 .ComAliquota(10)
                                 .Calcular();
   CheckEquals(90, lResultado);

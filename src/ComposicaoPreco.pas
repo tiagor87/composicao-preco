@@ -94,6 +94,7 @@ type
     function CalcularValorPorAliquota(pAliquota: Double; pTipoCalculo: TTipoCalculo): Double;
     function CalcularValorICMS(): Double;
     function CalcularValorIPI: Double;
+    function CalcularValorPIS: Double;
 
   protected
     procedure SetAliquotaCOFINS(const Value: Double);
@@ -182,6 +183,7 @@ begin
   lResultado := FCusto;
   lResultado := lResultado + Self.CalcularValorICMS();
   lResultado := lResultado + Self.CalcularValorIPI();
+  lResultado := lResultado + Self.CalcularValorPIS();
   Result := lResultado;
 end;
 
@@ -212,6 +214,11 @@ end;
 function TComposicaoPreco.CalcularValorIPI: Double;
 begin
   Result := Self.CalcularValorPorAliquota(FAliquotaIPI, FTipoCalculoAliquotaIPI);
+end;
+
+function TComposicaoPreco.CalcularValorPIS: Double;
+begin
+  Result := Self.CalcularValorPorAliquota(FAliquotaPIS, FTipoCalculoAliquotaPIS);
 end;
 
 function TComposicaoPreco.ComCusto(const Value: double): IComposicaoPreco;
