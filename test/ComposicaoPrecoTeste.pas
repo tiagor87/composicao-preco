@@ -37,6 +37,9 @@ type
     procedure DeveSerPossivelConsiderarParaSomaAAliquotaDeValorOperacional();
     procedure DeveSerPossivelDesconsiderarAAliquotaDeValorOperacional();
     procedure DeveSerPossivelConsiderarParaSubtracaoAAliquotaDeValorOperacional();
+    procedure DeveSerPossivelConsiderarParaSomaAAliquotaDeFrete();
+    procedure DeveSerPossivelDesconsiderarAAliquotaDeFrete();
+    procedure DeveSerPossivelConsiderarParaSubtracaoAAliquotaDeFrete();
     procedure DeveSerPossivelInformarOCusto();
 
     // Somente custo
@@ -113,6 +116,20 @@ type
     procedure DeveCalcularAliquotaLucroZeroQuandoSomarAliquotaOutrosDe10ECustoFor100();
     procedure DeveCalcularAliquotaMarkupZeroQuandoDesconsiderarAliquotaOutrosECustoFor100();
     procedure DeveCalcularAliquotaLucroZeroQuandoDesconsiderarAliquotaOutrosECustoFor100();
+
+    // Somente Substituição tributária
+    procedure DeveCalcularPrecoSugerido90QuandoSubtrairAliquotaSubstituicaoTributariaDe10ECustoFor100();
+    procedure DeveCalcularPrecoSugerido180QuandoSubtrairAliquotaSubstituicaoTributariaDe10ECustoFor200();
+    procedure DeveCalcularPrecoSugerido110QuandoSomarAliquotaSubstituicaoTributariaDe10ECustoFor100();
+    procedure DeveCalcularPrecoSugerido220QuandoSomarAliquotaSubstituicaoTributariaDe10ECustoFor200();
+    procedure DeveCalcularPrecoSugerido100QuandoDesconsiderarAliquotaSubstituicaoTributariaECustoFor100();
+
+    procedure DeveCalcularAliquotaMarkupZeroQuandoSubtrairAliquotaSubstituicaoTributariaDe10ECustoFor100();
+    procedure DeveCalcularAliquotaLucroZeroQuandoSubtrairAliquotaSubstituicaoTributariaDe10ECustoFor100();
+    procedure DeveCalcularAliquotaMarkupZeroQuandoSomarAliquotaSubstituicaoTributariaDe10ECustoFor100();
+    procedure DeveCalcularAliquotaLucroZeroQuandoSomarAliquotaSubstituicaoTributariaDe10ECustoFor100();
+    procedure DeveCalcularAliquotaMarkupZeroQuandoDesconsiderarAliquotaSubstituicaoTributariaECustoFor100();
+    procedure DeveCalcularAliquotaLucroZeroQuandoDesconsiderarAliquotaSubstituicaoTributariaECustoFor100();
 
   end;
 
@@ -203,6 +220,15 @@ begin
   CheckEquals(10, FComposicaoPreco.GetValorOperacional());
 end;
 
+procedure TComposicaoPrecoTeste.DeveSerPossivelConsiderarParaSomaAAliquotaDeFrete;
+begin
+  FComposicaoPreco.SomarFrete()
+                  .ComAliquota(10);
+
+  CheckTrue(FComposicaoPreco.GetTipoCalculoFrete() = tcSomar);
+  CheckEquals(10, FComposicaoPreco.GetAliquotaFrete());
+end;
+
 procedure TComposicaoPrecoTeste.DeveSerPossivelConsiderarParaSubtracaoAAliquotaDeCOFINS();
 begin
   FComposicaoPreco.SubtrairCOFINS()
@@ -266,6 +292,15 @@ begin
   CheckEquals(10, FComposicaoPreco.GetValorOperacional());
 end;
 
+procedure TComposicaoPrecoTeste.DeveSerPossivelConsiderarParaSubtracaoAAliquotaDeFrete;
+begin
+  FComposicaoPreco.SubtrairFrete()
+                  .ComAliquota(10);
+
+  CheckTrue(FComposicaoPreco.GetTipoCalculoFrete() = tcSubtrair);
+  CheckEquals(10, FComposicaoPreco.GetAliquotaFrete());
+end;
+
 procedure TComposicaoPrecoTeste.DeveSerPossivelDesconsiderarAAliquotaDeCOFINS();
 begin
   FComposicaoPreco.DesconsiderarCOFINS();
@@ -320,6 +355,14 @@ begin
 
   CheckTrue(FComposicaoPreco.GetTipoCalculoValorOperacional() = tcDesconsiderar);
   CheckEquals(0, FComposicaoPreco.GetValorOperacional());
+end;
+
+procedure TComposicaoPrecoTeste.DeveSerPossivelDesconsiderarAAliquotaDeFrete;
+begin
+  FComposicaoPreco.DesconsiderarFrete();
+
+  CheckTrue(FComposicaoPreco.GetTipoCalculoFrete() = tcDesconsiderar);
+  CheckEquals(0, FComposicaoPreco.GetAliquotaFrete());
 end;
 
 procedure TComposicaoPrecoTeste.DeveSerPossivelInformarOCusto;
@@ -876,6 +919,112 @@ var
 begin
   lResultado := FComposicaoPreco.ComCusto(100)
                                 .SubtrairOutros()
+                                .ComAliquota(10)
+                                .Calcular();
+  CheckEquals(90, lResultado);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaLucroZeroQuandoDesconsiderarAliquotaSubstituicaoTributariaECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .DesconsiderarSubstituicaoTributaria()
+                  .Calcular();
+  CheckEquals(0, FComposicaoPreco.GetAliquotaLucro);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaLucroZeroQuandoSomarAliquotaSubstituicaoTributariaDe10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .SomarSubstituicaoTributaria()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(0, FComposicaoPreco.GetAliquotaLucro);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaLucroZeroQuandoSubtrairAliquotaSubstituicaoTributariaDe10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .SubtrairSubstituicaoTributaria()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(0, FComposicaoPreco.GetAliquotaLucro);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaMarkupZeroQuandoDesconsiderarAliquotaSubstituicaoTributariaECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .DesconsiderarSubstituicaoTributaria
+                  .Calcular();
+  CheckEquals(0, FComposicaoPreco.GetAliquotaMarkup);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaMarkupZeroQuandoSomarAliquotaSubstituicaoTributariaDe10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .SomarSubstituicaoTributaria()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(0, FComposicaoPreco.GetAliquotaMarkup);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaMarkupZeroQuandoSubtrairAliquotaSubstituicaoTributariaDe10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .SubtrairSubstituicaoTributaria()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(0, FComposicaoPreco.GetAliquotaMarkup);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularPrecoSugerido100QuandoDesconsiderarAliquotaSubstituicaoTributariaECustoFor100;
+var
+  lResultado: double;
+begin
+  lResultado := FComposicaoPreco.ComCusto(100)
+                                .DesconsiderarSubstituicaoTributaria()
+                                .Calcular();
+  CheckEquals(100, lResultado);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularPrecoSugerido110QuandoSomarAliquotaSubstituicaoTributariaDe10ECustoFor100;
+var
+  lResultado: double;
+begin
+  lResultado := FComposicaoPreco.ComCusto(100)
+                                .SomarSubstituicaoTributaria()
+                                .ComAliquota(10)
+                                .Calcular();
+  CheckEquals(110, lResultado);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularPrecoSugerido180QuandoSubtrairAliquotaSubstituicaoTributariaDe10ECustoFor200;
+var
+  lResultado: double;
+begin
+  lResultado := FComposicaoPreco.ComCusto(200)
+                                .SubtrairSubstituicaoTributaria()
+                                .ComAliquota(10)
+                                .Calcular();
+  CheckEquals(180, lResultado);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularPrecoSugerido220QuandoSomarAliquotaSubstituicaoTributariaDe10ECustoFor200;
+var
+  lResultado: double;
+begin
+  lResultado := FComposicaoPreco.ComCusto(200)
+                                .SomarSubstituicaoTributaria()
+                                .ComAliquota(10)
+                                .Calcular();
+  CheckEquals(220, lResultado);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularPrecoSugerido90QuandoSubtrairAliquotaSubstituicaoTributariaDe10ECustoFor100;
+var
+  lResultado: double;
+begin
+  lResultado := FComposicaoPreco.ComCusto(100)
+                                .SubtrairSubstituicaoTributaria()
                                 .ComAliquota(10)
                                 .Calcular();
   CheckEquals(90, lResultado);
