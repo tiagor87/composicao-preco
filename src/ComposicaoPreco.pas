@@ -91,7 +91,9 @@ type
 
     FCusto: double;
 
-    function CalcularValorICMS(): Double; 
+    function CalcularValorPorAliquota(pAliquota: Double; pTipoCalculo: TTipoCalculo): Double;
+    function CalcularValorICMS(): Double;
+    function CalcularValorIPI: Double;
 
   protected
     procedure SetAliquotaCOFINS(const Value: Double);
@@ -179,26 +181,37 @@ var
 begin
   lResultado := FCusto;
   lResultado := lResultado + Self.CalcularValorICMS();
+  lResultado := lResultado + Self.CalcularValorIPI();
   Result := lResultado;
 end;
 
-function TComposicaoPreco.CalcularValorICMS: Double;
+function TComposicaoPreco.CalcularValorPorAliquota(pAliquota: Double; pTipoCalculo: TTipoCalculo): Double;
 var
-  lValorICMS: double;
+  lValor: double;
 begin
-  if (FAliquotaICMS = 0) then
+  if (pAliquota = 0) then
   begin
     Result := 0;
     Exit;
   end;
 
-  lValorICMS := FCusto * FAliquotaICMS / 100;
-  case FTipoCalculoAliquotaICMS of
-    tcSomar: Result := lValorICMS;
-    tcSubtrair: Result := -lValorICMS;
+  lValor := FCusto * pAliquota / 100;
+  case pTipoCalculo of
+    tcSomar: Result := lValor;
+    tcSubtrair: Result := -lValor;
   else
     Result := 0;
   end;
+end;
+
+function TComposicaoPreco.CalcularValorICMS: Double;
+begin
+  Result := Self.CalcularValorPorAliquota(FAliquotaICMS, FTipoCalculoAliquotaICMS);
+end;
+
+function TComposicaoPreco.CalcularValorIPI: Double;
+begin
+  Result := Self.CalcularValorPorAliquota(FAliquotaIPI, FTipoCalculoAliquotaIPI);
 end;
 
 function TComposicaoPreco.ComCusto(const Value: double): IComposicaoPreco;
