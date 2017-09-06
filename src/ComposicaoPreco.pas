@@ -58,8 +58,17 @@ type
     function GetTipoCalculoFrete(): TTipoCalculo;
     function GetAliquotaFrete(): double;
 
+    function SomarICMSVenda(): IComposicaoPrecoAliquota;
+    function DesconsiderarICMSVenda(): IComposicaoPreco;
+    function SubtrairICMSVenda(): IComposicaoPrecoAliquota;
+    function GetTipoCalculoAliquotaICMSVenda(): TTipoCalculo;
+    function GetAliquotaICMSVenda(): double;
+
     function ComCusto(const Value: double): IComposicaoPreco;
     function GetCusto(): double;
+
+    function UtilizarNumeroDeCasasDecimais(const Value: Integer): IComposicaoPreco;
+    function GetNumeroDeCasasDecimais(): Integer;
 
     function GetAliquotaLucro(): double;
     function GetAliquotaMarkup(): double;
@@ -96,8 +105,11 @@ type
     FTipoCalculoValorOperacional: TTipoCalculo;
     FAliquotaFrete: double;
     FTipoCalculoFrete: TTipoCalculo;
+    FAliquotaICMSVenda: double;
+    FTipoCalculoICMSVenda: TTipoCalculo;
 
     FCusto: double;
+    FNumeroDeCasasDecimais: Integer;
 
     function CalcularValorPorAliquota(pAliquota: Double; pTipoCalculo: TTipoCalculo): Double;
     function CalcularValorICMSCompra(): Double;
@@ -106,6 +118,8 @@ type
     function CalcularValorCOFINS: Double;
     function CalcularValorOutros: Double;
     function CalcularValorSubstituicaoTributaria: Double;
+    function CalcularValorOperacional: Double;
+    function CalcularValorICMSVenda(const pValorCusto: Double): Double;
 
   protected
     procedure SetAliquotaCOFINS(const Value: Double);
@@ -116,6 +130,7 @@ type
     procedure SetAliquotaSubstituicaoTributaria(const Value: Double);
     procedure SetValorOperacional(const Value: Double);
     procedure SetAliquotaFrete(const Value: Double);
+    procedure SetAliquotaICMSVenda(const Value: Double);
 
   public
     constructor Create();
@@ -130,6 +145,7 @@ type
     function DesconsiderarPIS: IComposicaoPreco;
     function DesconsiderarSubstituicaoTributaria: IComposicaoPreco;
     function DesconsiderarValorOperacional: IComposicaoPreco;
+    function DesconsiderarICMSVenda(): IComposicaoPreco;
 
     function SomarCOFINS: IComposicaoPrecoAliquota;
     function SomarICMSCompra: IComposicaoPrecoAliquota;
@@ -139,6 +155,7 @@ type
     function SomarSubstituicaoTributaria: IComposicaoPrecoAliquota;
     function SomarValorOperacional: IComposicaoPrecoValor;
     function SomarFrete(): IComposicaoPrecoAliquota;
+    function SomarICMSVenda(): IComposicaoPrecoAliquota;
 
     function SubtrairCOFINS: IComposicaoPrecoAliquota;
     function SubtrairICMSCompra: IComposicaoPrecoAliquota;
@@ -148,6 +165,9 @@ type
     function SubtrairSubstituicaoTributaria: IComposicaoPrecoAliquota;
     function SubtrairValorOperacional: IComposicaoPrecoValor;
     function SubtrairFrete(): IComposicaoPrecoAliquota;
+    function SubtrairICMSVenda(): IComposicaoPrecoAliquota;
+
+    function UtilizarNumeroDeCasasDecimais(const Value: Integer): IComposicaoPreco;
 
     function ComCusto(const Value: double): IComposicaoPreco;
 
@@ -159,7 +179,9 @@ type
     function GetAliquotaSubstituicaoTributaria: Double;
     function GetValorOperacional: Double;
     function GetAliquotaFrete(): double;
+    function GetAliquotaICMSVenda(): double;
     function GetCusto: Double;
+    function GetNumeroDeCasasDecimais(): Integer;
 
     function GetTipoCalculoAliquotaICMSCompra: TTipoCalculo;
     function GetTipoCalculoAliquotaCOFINS: TTipoCalculo;
@@ -169,6 +191,7 @@ type
     function GetTipoCalculoAliquotaSubstituicaoTributaria: TTipoCalculo;
     function GetTipoCalculoValorOperacional: TTipoCalculo;
     function GetTipoCalculoFrete(): TTipoCalculo;
+    function GetTipoCalculoAliquotaICMSVenda(): TTipoCalculo;
 
     function GetAliquotaLucro(): Double;
     function GetAliquotaMarkup(): Double;
@@ -176,6 +199,8 @@ type
   end;
 
 implementation
+
+uses Math;
 
 { TComposicaoPreco }
 
@@ -197,33 +222,32 @@ type
 
 function TComposicaoPreco.Calcular: Double;
 var
-  lResultado: double;
+  lValorCustoTotal,
+  lValorCustoFinal: Double;
 begin
-  lResultado := FCusto;
-  lResultado := lResultado + Self.CalcularValorICMSCompra();
-  lResultado := lResultado + Self.CalcularValorIPI();
-  lResultado := lResultado + Self.CalcularValorPIS();
-  lResultado := lResultado + Self.CalcularValorCOFINS();
-  lResultado := lResultado + Self.CalcularValorOutros();
-  lResultado := lResultado + Self.CalcularValorSubstituicaoTributaria();
-  Result := lResultado;
+  lValorCustoTotal := FCusto
+    + Self.CalcularValorICMSCompra()
+    + Self.CalcularValorIPI()
+    + Self.CalcularValorPIS()
+    + Self.CalcularValorCOFINS()
+    + Self.CalcularValorOutros()
+    + Self.CalcularValorSubstituicaoTributaria()
+    + Self.CalcularValorOperacional();
+  lValorCustoFinal := lValorCustoTotal + Self.CalcularValorICMSVenda(lValorCustoTotal);
+  Result := RoundTo(lValorCustoFinal, -FNumeroDeCasasDecimais); 
 end;
 
 function TComposicaoPreco.CalcularValorPorAliquota(pAliquota: Double; pTipoCalculo: TTipoCalculo): Double;
-var
-  lValor: double;
 begin
-  if ((pAliquota = 0) or (pTipoCalculo = tcDesconsiderar)) then
+  if ((pAliquota <= 0) or (pTipoCalculo = tcDesconsiderar)) then
   begin
     Result := 0;
     Exit;
   end;
 
-  lValor := FCusto * pAliquota / 100;
-  if pTipoCalculo = tcSomar then
-    Result := lValor
-  else
-    Result := -lValor;
+  Result := FCusto * pAliquota / 100;
+  if (pTipoCalculo = tcSubtrair) then
+    Result := -Result;
 end;
 
 function TComposicaoPreco.CalcularValorICMSCompra: Double;
@@ -254,6 +278,33 @@ end;
 function TComposicaoPreco.CalcularValorSubstituicaoTributaria: Double;
 begin
   Result := Self.CalcularValorPorAliquota(FAliquotaSubstituicaoTributaria, FTipoCalculoAliquotaSubstituicaoTributaria);
+end;
+
+function TComposicaoPreco.CalcularValorOperacional: Double;
+begin
+  if ((FValorOperacional <= 0) or (FTipoCalculoValorOperacional = tcDesconsiderar)) then
+  begin
+    Result := 0;
+    Exit;
+  end;
+
+  Result := FValorOperacional;
+
+  if (FTipoCalculoValorOperacional = tcSubtrair) then
+    Result := -Result;
+end;
+
+function TComposicaoPreco.CalcularValorICMSVenda(const pValorCusto: Double): Double;
+begin
+  if ((FAliquotaICMSVenda <= 0) or (FTipoCalculoICMSVenda = tcDesconsiderar)) then
+  begin
+    Result := 0;
+    Exit;
+  end;
+
+  Result := pValorCusto / (1 - FAliquotaICMSVenda / 100) - pValorCusto;
+  if (FTipoCalculoICMSVenda = tcSubtrair) then
+    Result := -Result;
 end;
 
 function TComposicaoPreco.ComCusto(const Value: double): IComposicaoPreco;
@@ -567,6 +618,51 @@ end;
 procedure TComposicaoPreco.SetAliquotaFrete(const Value: Double);
 begin
   FAliquotaFrete := Value;
+end;
+
+function TComposicaoPreco.DesconsiderarICMSVenda: IComposicaoPreco;
+begin
+  FTipoCalculoICMSVenda := tcDesconsiderar;
+  FAliquotaICMSVenda := 0;
+  Result := Self;
+end;
+
+function TComposicaoPreco.GetAliquotaICMSVenda: double;
+begin
+  Result := FAliquotaICMSVenda;
+end;
+
+function TComposicaoPreco.GetTipoCalculoAliquotaICMSVenda: TTipoCalculo;
+begin
+  Result := FTipoCalculoICMSVenda;
+end;
+
+function TComposicaoPreco.SomarICMSVenda: IComposicaoPrecoAliquota;
+begin
+  FTipoCalculoICMSVenda := tcSomar;
+  Result := TComposicaoPrecoAtribuicaoValor.Create(Self, Self.SetAliquotaICMSVenda);
+end;
+
+function TComposicaoPreco.SubtrairICMSVenda: IComposicaoPrecoAliquota;
+begin
+  FTipoCalculoICMSVenda := tcSubtrair;
+  Result := TComposicaoPrecoAtribuicaoValor.Create(Self, Self.SetAliquotaICMSVenda);
+end;
+
+procedure TComposicaoPreco.SetAliquotaICMSVenda(const Value: Double);
+begin
+  FAliquotaICMSVenda := Value;
+end;
+
+function TComposicaoPreco.GetNumeroDeCasasDecimais: Integer;
+begin
+  Result := FNumeroDeCasasDecimais;
+end;
+
+function TComposicaoPreco.UtilizarNumeroDeCasasDecimais(const Value: Integer): IComposicaoPreco;
+begin
+  FNumeroDeCasasDecimais := Value;
+  Result := Self;
 end;
 
 { TComposicaoPrecoAtribuicaoValor }
