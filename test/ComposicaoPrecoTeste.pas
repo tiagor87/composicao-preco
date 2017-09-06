@@ -154,6 +154,13 @@ type
     procedure DeveCalcularPrecoSugerido88E89QuandoSubtrairAliquotaICMSVendaDe10ECustoFor100();
     procedure DeveCalcularPrecoSugerido100QuandoDesconsiderarAliquotaICMSVendaECustoFor100();
 
+    procedure DeveCalcularAliquotaMarkupZeroQuandoSubtrairAliquotaICMSVendaDe10ECustoFor100();
+    procedure DeveCalcularAliquotaMarkupZeroQuandoSomarAliquotaICMSVendaDe10ECustoFor100();
+    procedure DeveCalcularAliquotaMarkupZeroQuandoDesconsiderarAliquotaICMSVendaECustoFor100();
+    procedure DeveCalcularAliquotaLucroZeroQuandoSubtrairAliquotaICMSVendaDe10ECustoFor100();
+    procedure DeveCalcularAliquotaLucroZeroQuandoSomarAliquotaICMSVendaDe10ECustoFor100();
+    procedure DeveCalcularAliquotaLucroZeroQuandoDesconsiderarAliquotaICMSVendaECustoFor100();
+
   end;
 
 implementation
@@ -1229,6 +1236,58 @@ begin
                                 .DesconsiderarICMSVenda()
                                 .Calcular();
   CheckEquals(100, lResultado);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaLucroZeroQuandoDesconsiderarAliquotaICMSVendaECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .DesconsiderarICMSVenda()
+                  .Calcular();
+  CheckEquals(0, FComposicaoPreco.GetAliquotaLucro());
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaLucroZeroQuandoSomarAliquotaICMSVendaDe10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .SomarICMSVenda()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(0, FComposicaoPreco.GetAliquotaLucro());
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaLucroZeroQuandoSubtrairAliquotaICMSVendaDe10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .SubtrairICMSVenda()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(0, FComposicaoPreco.GetAliquotaLucro());
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaMarkupZeroQuandoDesconsiderarAliquotaICMSVendaECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .DesconsiderarICMSVenda()
+                  .Calcular();
+  CheckEquals(0, FComposicaoPreco.GetAliquotaMarkup());
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaMarkupZeroQuandoSomarAliquotaICMSVendaDe10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .SomarICMSVenda()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(0, FComposicaoPreco.GetAliquotaMarkup());
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaMarkupZeroQuandoSubtrairAliquotaICMSVendaDe10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .SubtrairICMSVenda()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(0, FComposicaoPreco.GetAliquotaMarkup());
 end;
 
 initialization
