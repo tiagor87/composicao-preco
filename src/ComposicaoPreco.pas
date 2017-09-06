@@ -70,8 +70,10 @@ type
     function UtilizarNumeroDeCasasDecimais(const Value: Integer): IComposicaoPreco;
     function GetNumeroDeCasasDecimais(): Integer;
 
-    function GetAliquotaLucro(): double;
+    function UtilizarMarkup(): IComposicaoPrecoAliquota;
     function GetAliquotaMarkup(): double;
+
+    function GetAliquotaLucro(): double;
 
     function Calcular(): double;
 
@@ -110,6 +112,9 @@ type
 
     FCusto: double;
     FNumeroDeCasasDecimais: Integer;
+    FUtilizarMarkup: Boolean;
+    FAliquotaMarkup: double;
+    FAliquotaLucro: double;
 
     function CalcularValorPorAliquota(pAliquota: Double; pTipoCalculo: TTipoCalculo): Double;
     function CalcularValorICMSCompra(): Double;
@@ -120,6 +125,7 @@ type
     function CalcularValorSubstituicaoTributaria: Double;
     function CalcularValorOperacional: Double;
     function CalcularValorICMSVenda(const pValorCusto: Double): Double;
+    function CalcularValorMarkup(const pValorCusto: Double): Double;
 
   protected
     procedure SetAliquotaCOFINS(const Value: Double);
@@ -131,6 +137,7 @@ type
     procedure SetValorOperacional(const Value: Double);
     procedure SetAliquotaFrete(const Value: Double);
     procedure SetAliquotaICMSVenda(const Value: Double);
+    procedure SetAliquotaMarkup(const Value: Double);
 
   public
     constructor Create();
@@ -170,6 +177,7 @@ type
     function UtilizarNumeroDeCasasDecimais(const Value: Integer): IComposicaoPreco;
 
     function ComCusto(const Value: double): IComposicaoPreco;
+    function UtilizarMarkup(): IComposicaoPrecoAliquota;
 
     function GetAliquotaCOFINS: Double;
     function GetAliquotaICMSCompra: Double;
@@ -205,7 +213,7 @@ uses Math;
 { TComposicaoPreco }
 
 type
-  TSetMethod = procedure(const value: double) of object;
+  TSetMethod = procedure(const Value: double) of object;
 
   TComposicaoPrecoAtribuicaoValor = class(TInterfacedObject, IComposicaoPrecoAliquota, IComposicaoPrecoValor)
   private
@@ -223,7 +231,8 @@ type
 function TComposicaoPreco.Calcular: Double;
 var
   lValorCustoTotal,
-  lValorCustoFinal: Double;
+  lValorCustoFinal,
+  lValorMarkup: Double;
 begin
   lValorCustoTotal := FCusto
     + Self.CalcularValorICMSCompra()
@@ -234,7 +243,8 @@ begin
     + Self.CalcularValorSubstituicaoTributaria()
     + Self.CalcularValorOperacional();
   lValorCustoFinal := lValorCustoTotal + Self.CalcularValorICMSVenda(lValorCustoTotal);
-  Result := RoundTo(lValorCustoFinal, -FNumeroDeCasasDecimais); 
+  lValorMarkup := lValorCustoFinal + Self.CalcularValorMarkup(lValorCustoFinal);
+  Result := RoundTo(lValorMarkup, -FNumeroDeCasasDecimais);
 end;
 
 function TComposicaoPreco.CalcularValorPorAliquota(pAliquota: Double; pTipoCalculo: TTipoCalculo): Double;
@@ -307,6 +317,21 @@ begin
     Result := -Result;
 end;
 
+function TComposicaoPreco.CalcularValorMarkup(const pValorCusto: Double): Double;
+var
+  lValorMakup: double;
+begin
+  if ((FAliquotaMarkup <= 0) or (not FUtilizarMarkup)) then
+  begin
+    Result := 0;
+    Exit;
+  end;
+
+  lValorMakup := pValorCusto / (1 - FAliquotaMarkup / 100) - pValorCusto;
+  FAliquotaLucro := lValorMakup * 100 / pValorCusto;
+  Result := lValorMakup;
+end;
+
 function TComposicaoPreco.ComCusto(const Value: double): IComposicaoPreco;
 begin
   FCusto := Value;
@@ -331,6 +356,8 @@ begin
   FTipoCalculoValorOperacional := tcSomar;
 
   FCusto := 0;
+  FAliquotaMarkup := 0;
+  FAliquotaLucro := 0;
 end;
 
 function TComposicaoPreco.DesconsiderarCOFINS: IComposicaoPreco;
@@ -399,12 +426,12 @@ end;
 
 function TComposicaoPreco.GetAliquotaLucro: Double;
 begin
-  Result := 0;
+  Result := RoundTo(FAliquotaLucro, -FNumeroDeCasasDecimais);
 end;
 
 function TComposicaoPreco.GetAliquotaMarkup: Double;
 begin
-  Result := 0;
+  Result := FAliquotaMarkup;
 end;
 
 function TComposicaoPreco.GetAliquotaOutros: Double;
@@ -663,6 +690,18 @@ function TComposicaoPreco.UtilizarNumeroDeCasasDecimais(const Value: Integer): I
 begin
   FNumeroDeCasasDecimais := Value;
   Result := Self;
+end;
+
+function TComposicaoPreco.UtilizarMarkup: IComposicaoPrecoAliquota;
+begin
+  FUtilizarMarkup := true;
+  FAliquotaLucro := 0;
+  Result := TComposicaoPrecoAtribuicaoValor.Create(Self, Self.SetAliquotaMarkup);
+end;
+
+procedure TComposicaoPreco.SetAliquotaMarkup(const Value: Double);
+begin
+  FAliquotaMarkup := Value;
 end;
 
 { TComposicaoPrecoAtribuicaoValor }

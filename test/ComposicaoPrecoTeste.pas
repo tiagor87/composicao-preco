@@ -45,6 +45,7 @@ type
     procedure DeveSerPossivelConsiderarParaSubtracaoAAliquotaDeICMSVenda();
     procedure DeveSerPossivelInformarOCusto();
     procedure DeveSerPossivelInformarONumeroDeCasasDecimaisASerUtilizada();
+    procedure DeveSerPossivelInformarAAliquotaDeMarkup();
 
     // Somente custo
     procedure DeveCalcularPrecoSugerido100QuandoTodasAsAliquotasEstiveremZeradasECustoFor100();
@@ -160,6 +161,11 @@ type
     procedure DeveCalcularAliquotaLucroZeroQuandoSubtrairAliquotaICMSVendaDe10ECustoFor100();
     procedure DeveCalcularAliquotaLucroZeroQuandoSomarAliquotaICMSVendaDe10ECustoFor100();
     procedure DeveCalcularAliquotaLucroZeroQuandoDesconsiderarAliquotaICMSVendaECustoFor100();
+
+    // Cálculo Markup
+    procedure DeveCalcularPrecoSugerido111E11QuandoCalcularPorAliquotaMarkupDe10ECustoFor100();
+    procedure DeveCalcularAliquotaLucro11E11QuandoCalcularPorAliquotaMarkupDe10ECustoFor100();
+    procedure DeveCalcularAliquotaLucro11E11QuandoCalcularPorAliquotaMarkupDe10ECustoFor200();
 
   end;
 
@@ -1288,6 +1294,45 @@ begin
                   .ComAliquota(10)
                   .Calcular();
   CheckEquals(0, FComposicaoPreco.GetAliquotaMarkup());
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularPrecoSugerido111E11QuandoCalcularPorAliquotaMarkupDe10ECustoFor100;
+var
+  lResultado: double;
+begin
+  lResultado := FComposicaoPreco.ComCusto(100)
+                                .UtilizarNumeroDeCasasDecimais(2)
+                                .UtilizarMarkup()
+                                .ComAliquota(10)
+                                .Calcular();
+  CheckEquals(111.11, lResultado, 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveSerPossivelInformarAAliquotaDeMarkup;
+begin
+  FComposicaoPreco.UtilizarMarkup()
+                  .ComAliquota(10);
+  CheckEquals(10, FComposicaoPreco.GetAliquotaMarkup());
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaLucro11E11QuandoCalcularPorAliquotaMarkupDe10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .UtilizarNumeroDeCasasDecimais(2)
+                  .UtilizarMarkup()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(11.11, FComposicaoPreco.GetAliquotaLucro(), 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaLucro11E11QuandoCalcularPorAliquotaMarkupDe10ECustoFor200;
+begin
+  FComposicaoPreco.ComCusto(200)
+                  .UtilizarNumeroDeCasasDecimais(2)
+                  .UtilizarMarkup()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(11.11, FComposicaoPreco.GetAliquotaLucro(), 0.001);
 end;
 
 initialization
