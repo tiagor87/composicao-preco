@@ -73,6 +73,7 @@ type
     function UtilizarMarkup(): IComposicaoPrecoAliquota;
     function GetAliquotaMarkup(): double;
 
+    function UtilizarLucro(): IComposicaoPrecoAliquota;
     function GetAliquotaLucro(): double;
 
     function Calcular(): double;
@@ -125,6 +126,7 @@ type
     function CalcularValorSubstituicaoTributaria: Double;
     function CalcularValorOperacional: Double;
     function CalcularValorICMSVenda(const pValorCusto: Double): Double;
+    function CalcularValorLucro(const pValorCusto: Double): Double;
     function CalcularValorMarkup(const pValorCusto: Double): Double;
 
   protected
@@ -138,6 +140,7 @@ type
     procedure SetAliquotaFrete(const Value: Double);
     procedure SetAliquotaICMSVenda(const Value: Double);
     procedure SetAliquotaMarkup(const Value: Double);
+    procedure SetAliquotaLucro(const Value: Double);
 
   public
     constructor Create();
@@ -178,6 +181,7 @@ type
 
     function ComCusto(const Value: double): IComposicaoPreco;
     function UtilizarMarkup(): IComposicaoPrecoAliquota;
+    function UtilizarLucro(): IComposicaoPrecoAliquota;
 
     function GetAliquotaCOFINS: Double;
     function GetAliquotaICMSCompra: Double;
@@ -229,12 +233,8 @@ type
   end;
 
 function TComposicaoPreco.Calcular: Double;
-var
-  lValorCustoTotal,
-  lValorCustoFinal,
-  lValorMarkup: Double;
 begin
-  lValorCustoTotal := FCusto
+  Result := FCusto
     + Self.CalcularValorICMSCompra()
     + Self.CalcularValorIPI()
     + Self.CalcularValorPIS()
@@ -242,9 +242,11 @@ begin
     + Self.CalcularValorOutros()
     + Self.CalcularValorSubstituicaoTributaria()
     + Self.CalcularValorOperacional();
-  lValorCustoFinal := lValorCustoTotal + Self.CalcularValorICMSVenda(lValorCustoTotal);
-  lValorMarkup := lValorCustoFinal + Self.CalcularValorMarkup(lValorCustoFinal);
-  Result := RoundTo(lValorMarkup, -FNumeroDeCasasDecimais);
+
+  Result := Result + Self.CalcularValorICMSVenda(Result);
+  Result := Result + Self.CalcularValorLucro(Result);
+  Result := Result + Self.CalcularValorMarkup(Result);
+  Result := RoundTo(Result, -FNumeroDeCasasDecimais);
 end;
 
 function TComposicaoPreco.CalcularValorPorAliquota(pAliquota: Double; pTipoCalculo: TTipoCalculo): Double;
@@ -317,9 +319,24 @@ begin
     Result := -Result;
 end;
 
+function TComposicaoPreco.CalcularValorLucro(const pValorCusto: Double): Double;
+var
+  lValorLucro: double;
+begin
+  if ((FAliquotaLucro <= 0) or (FUtilizarMarkup)) then
+  begin
+    Result := 0;
+    Exit;
+  end;
+
+  lValorLucro := pValorCusto / (1 - FAliquotaLucro / 100) - pValorCusto;
+  FAliquotaMarkup := lValorLucro * 100 / pValorCusto;
+  Result := lValorLucro;
+end;
+
 function TComposicaoPreco.CalcularValorMarkup(const pValorCusto: Double): Double;
 var
-  lValorMakup: double;
+  lAliquotaMarkup: double;
 begin
   if ((FAliquotaMarkup <= 0) or (not FUtilizarMarkup)) then
   begin
@@ -327,9 +344,9 @@ begin
     Exit;
   end;
 
-  lValorMakup := pValorCusto / (1 - FAliquotaMarkup / 100) - pValorCusto;
-  FAliquotaLucro := lValorMakup * 100 / pValorCusto;
-  Result := lValorMakup;
+  lAliquotaMarkup := (100 + FAliquotaMarkup) / 100; // Adequa a alíquota de markup para o cálculo.
+  FAliquotaLucro := (100 * lAliquotaMarkup - 100) / lAliquotaMarkup;
+  Result := pValorCusto * lAliquotaMarkup - pValorCusto;
 end;
 
 function TComposicaoPreco.ComCusto(const Value: double): IComposicaoPreco;
@@ -431,7 +448,7 @@ end;
 
 function TComposicaoPreco.GetAliquotaMarkup: Double;
 begin
-  Result := FAliquotaMarkup;
+  Result := RoundTo(FAliquotaMarkup, -FNumeroDeCasasDecimais);
 end;
 
 function TComposicaoPreco.GetAliquotaOutros: Double;
@@ -702,6 +719,18 @@ end;
 procedure TComposicaoPreco.SetAliquotaMarkup(const Value: Double);
 begin
   FAliquotaMarkup := Value;
+end;
+
+procedure TComposicaoPreco.SetAliquotaLucro(const Value: Double);
+begin
+  FAliquotaLucro := Value;
+end;
+
+function TComposicaoPreco.UtilizarLucro: IComposicaoPrecoAliquota;
+begin
+  FUtilizarMarkup := false;
+  FAliquotaMarkup := 0;
+  Result := TComposicaoPrecoAtribuicaoValor.Create(Self, Self.SetAliquotaLucro);
 end;
 
 { TComposicaoPrecoAtribuicaoValor }
