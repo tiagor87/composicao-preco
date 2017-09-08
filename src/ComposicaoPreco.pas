@@ -67,6 +67,8 @@ type
     function ComCusto(const Value: double): IComposicaoPreco;
     function GetCusto(): double;
 
+    function ComPrecoSugerido(const Value: double): IComposicaoPreco;
+
     function UtilizarNumeroDeCasasDecimais(const Value: Integer): IComposicaoPreco;
     function GetNumeroDeCasasDecimais(): Integer;
 
@@ -128,6 +130,9 @@ type
     function CalcularValorICMSVenda(const pValorCusto: Double): Double;
     function CalcularValorLucro(const pValorCusto: Double): Double;
     function CalcularValorMarkup(const pValorCusto: Double): Double;
+    function CalcularCustoTotal(): Double;
+    function CalcularAliquotaLucroAPartirDoMarkup(const pValorCusto: Double): Double;
+    function ConverterAliquotaMarkupParaCalculo(): Double;
 
   protected
     procedure SetAliquotaCOFINS(const Value: Double);
@@ -180,6 +185,8 @@ type
     function UtilizarNumeroDeCasasDecimais(const Value: Integer): IComposicaoPreco;
 
     function ComCusto(const Value: double): IComposicaoPreco;
+    function ComPrecoSugerido(const Value: double): IComposicaoPreco;
+
     function UtilizarMarkup(): IComposicaoPrecoAliquota;
     function UtilizarLucro(): IComposicaoPrecoAliquota;
 
@@ -234,6 +241,14 @@ type
 
 function TComposicaoPreco.Calcular: Double;
 begin
+  Result := Self.CalcularCustoTotal();
+  Result := Result + Self.CalcularValorLucro(Result);
+  Result := Result + Self.CalcularValorMarkup(Result);
+  Result := RoundTo(Result, -FNumeroDeCasasDecimais);
+end;
+
+function TComposicaoPreco.CalcularCustoTotal(): Double;
+begin
   Result := FCusto
     + Self.CalcularValorICMSCompra()
     + Self.CalcularValorIPI()
@@ -244,9 +259,6 @@ begin
     + Self.CalcularValorOperacional();
 
   Result := Result + Self.CalcularValorICMSVenda(Result);
-  Result := Result + Self.CalcularValorLucro(Result);
-  Result := Result + Self.CalcularValorMarkup(Result);
-  Result := RoundTo(Result, -FNumeroDeCasasDecimais);
 end;
 
 function TComposicaoPreco.CalcularValorPorAliquota(pAliquota: Double; pTipoCalculo: TTipoCalculo): Double;
@@ -335,8 +347,6 @@ begin
 end;
 
 function TComposicaoPreco.CalcularValorMarkup(const pValorCusto: Double): Double;
-var
-  lAliquotaMarkup: double;
 begin
   if ((FAliquotaMarkup <= 0) or (not FUtilizarMarkup)) then
   begin
@@ -344,15 +354,37 @@ begin
     Exit;
   end;
 
-  lAliquotaMarkup := (100 + FAliquotaMarkup) / 100; // Adequa a alíquota de markup para o cálculo.
-  FAliquotaLucro := (100 * lAliquotaMarkup - 100) / lAliquotaMarkup;
-  Result := pValorCusto * lAliquotaMarkup - pValorCusto;
+  FAliquotaLucro := Self.CalcularAliquotaLucroAPartirDoMarkup(pValorCusto);
+  Result := pValorCusto * Self.ConverterAliquotaMarkupParaCalculo() - pValorCusto;
+end;
+
+function TComposicaoPreco.ConverterAliquotaMarkupParaCalculo(): Double;
+begin
+  Result := (100 + FAliquotaMarkup) / 100; // Adequa a alíquota de markup para o cálculo.
+end;
+
+function TComposicaoPreco.CalcularAliquotaLucroAPartirDoMarkup(const pValorCusto: Double): Double;
+var
+  lAliquotaMarkup: double;
+begin
+  lAliquotaMarkup := Self.ConverterAliquotaMarkupParaCalculo();
+  Result := (100 * lAliquotaMarkup - 100) / lAliquotaMarkup;
 end;
 
 function TComposicaoPreco.ComCusto(const Value: double): IComposicaoPreco;
 begin
   FCusto := Value;
   Result := Self;
+end;
+
+function TComposicaoPreco.ComPrecoSugerido(const Value: double): IComposicaoPreco;
+var
+  lCustoTotal: Double;
+begin
+  lCustoTotal := Self.CalcularCustoTotal();
+  FUtilizarMarkup := true;
+  FAliquotaMarkup := Value * 100 / lCustoTotal - 100;
+  FAliquotaLucro := Self.CalcularAliquotaLucroAPartirDoMarkup(lCustoTotal);
 end;
 
 constructor TComposicaoPreco.Create;

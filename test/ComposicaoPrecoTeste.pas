@@ -173,6 +173,12 @@ type
     procedure DeveCalcularAliquotaLucro11E96QuandoCalcularPorAliquotaMarkupDe13E58ECustoFor200;
     procedure DeveCalcularPrecoSugerido227E17QuandoCalcularPorAliquotaMarkupDe13E58ECustoFor200;
 
+    // Cálculo por preço sugerido
+    procedure DeveCalcularAliquotaLucro20QuandoCalcularPorPrecoSugeridoDe125ECustoFor100;
+    procedure DeveCalcularAliquotaMarkup25QuandoCalcularPorPrecoSugeridoDe125ECustoFor100;
+    procedure DeveCalcularAliquotaLucro7e83QuandoCalcularPorPrecoSugeridoDe217ECustoFor200;
+    procedure DeveCalcularAliquotaMarkup8e50QuandoCalcularPorPrecoSugeridoDe217ECustoFor200;
+
   end;
 
 implementation
@@ -1378,6 +1384,38 @@ begin
                                 .ComAliquota(13.58)
                                 .Calcular();
   CheckEquals(227.16, lResultado, 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaLucro20QuandoCalcularPorPrecoSugeridoDe125ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .UtilizarNumeroDeCasasDecimais(2)
+                  .ComPrecoSugerido(125);
+  CheckEquals(20, FComposicaoPreco.GetAliquotaLucro(), 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaMarkup25QuandoCalcularPorPrecoSugeridoDe125ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .UtilizarNumeroDeCasasDecimais(2)
+                  .ComPrecoSugerido(125);
+  CheckEquals(25, FComposicaoPreco.GetAliquotaMarkup(), 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaLucro7e83QuandoCalcularPorPrecoSugeridoDe217ECustoFor200;
+begin
+  FComposicaoPreco.ComCusto(200)
+                  .UtilizarNumeroDeCasasDecimais(2)
+                  .ComPrecoSugerido(217);
+  CheckEquals(7.83, FComposicaoPreco.GetAliquotaLucro(), 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaMarkup8e50QuandoCalcularPorPrecoSugeridoDe217ECustoFor200;
+begin
+  FComposicaoPreco.ComCusto(200)
+                  .UtilizarNumeroDeCasasDecimais(2)
+                  .ComPrecoSugerido(217);
+  CheckEquals(8.5, FComposicaoPreco.GetAliquotaMarkup(), 0.001);
 end;
 
 initialization
