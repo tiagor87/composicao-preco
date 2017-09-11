@@ -2,6 +2,9 @@ unit ComposicaoPreco;
 
 interface
 
+uses
+  SysUtils;
+
 type
   TTipoCalculo = (tcSomar, tcDesconsiderar, tcSubtrair);
 
@@ -90,6 +93,9 @@ type
   IComposicaoPrecoValor = interface
   ['{AE5A8692-654C-4D0D-9C21-C90685571D1E}']
     function ComValor(pValor: double): IComposicaoPreco;
+  end;
+
+  ECustoFinalInvalido = class(Exception)
   end;
 
   TComposicaoPreco = class(TInterfacedObject, IComposicaoPreco)
@@ -259,6 +265,11 @@ begin
     + Self.CalcularValorOperacional();
 
   Result := Result + Self.CalcularValorICMSVenda(Result);
+
+  if (Result <= 0) then
+  begin
+    raise ECustoFinalInvalido.Create(Format('O custo final está com o valor de %f e deveria ser maior que zero.', [RoundTo(Result, -2)]));
+  end;
 end;
 
 function TComposicaoPreco.CalcularValorPorAliquota(pAliquota: Double; pTipoCalculo: TTipoCalculo): Double;

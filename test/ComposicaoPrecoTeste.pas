@@ -10,6 +10,12 @@ type
   private
     FComposicaoPreco: IComposicaoPreco;
 
+    procedure GerarExcecaoCustoIgualZero();
+    procedure GerarExcecaoCustoInferiorAZero();
+
+    procedure GerarExcecaoPrecoSugeridoIgualZero();
+    procedure GerarExcecaoPrecoSugeridoInferiorAZero();
+
   protected
     procedure SetUp; override;
     procedure TearDown; override;
@@ -178,6 +184,12 @@ type
     procedure DeveCalcularAliquotaMarkup25QuandoCalcularPorPrecoSugeridoDe125ECustoFor100;
     procedure DeveCalcularAliquotaLucro7e83QuandoCalcularPorPrecoSugeridoDe217ECustoFor200;
     procedure DeveCalcularAliquotaMarkup8e50QuandoCalcularPorPrecoSugeridoDe217ECustoFor200;
+
+    // Falhas
+    procedure DeveFalharQuandoOValorCustoFinalForIgualAZero();
+    procedure DeveFalharQuandoOValorCustoFinalForInferiorAZero();
+    procedure DeveFalharQuandoPrecoSugeridoForIgualAZero();
+    procedure DeveFalharQuandoPrecoSugeridoForInferiorAZero();
 
   end;
 
@@ -1416,6 +1428,56 @@ begin
                   .UtilizarNumeroDeCasasDecimais(2)
                   .ComPrecoSugerido(217);
   CheckEquals(8.5, FComposicaoPreco.GetAliquotaMarkup(), 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveFalharQuandoOValorCustoFinalForIgualAZero;
+begin
+  CheckException(Self.GerarExcecaoCustoIgualZero, ECustoFinalInvalido);
+end;
+
+procedure TComposicaoPrecoTeste.DeveFalharQuandoOValorCustoFinalForInferiorAZero;
+begin
+  CheckException(Self.GerarExcecaoCustoInferiorAZero, ECustoFinalInvalido);
+end;
+
+procedure TComposicaoPrecoTeste.GerarExcecaoCustoIgualZero;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .SubtrairICMSCompra()
+                  .ComAliquota(50)
+                  .SubtrairIPI()
+                  .ComAliquota(50)
+                  .Calcular();
+end;
+
+procedure TComposicaoPrecoTeste.GerarExcecaoCustoInferiorAZero;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .SubtrairICMSCompra()
+                  .ComAliquota(60)
+                  .SubtrairIPI()
+                  .ComAliquota(60)
+                  .Calcular();
+end;
+
+procedure TComposicaoPrecoTeste.DeveFalharQuandoPrecoSugeridoForIgualAZero;
+begin
+
+end;
+
+procedure TComposicaoPrecoTeste.DeveFalharQuandoPrecoSugeridoForInferiorAZero;
+begin
+
+end;
+
+procedure TComposicaoPrecoTeste.GerarExcecaoPrecoSugeridoIgualZero;
+begin
+
+end;
+
+procedure TComposicaoPrecoTeste.GerarExcecaoPrecoSugeridoInferiorAZero;
+begin
+
 end;
 
 initialization
