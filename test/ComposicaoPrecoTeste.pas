@@ -13,9 +13,6 @@ type
     procedure GerarExcecaoCustoIgualZero();
     procedure GerarExcecaoCustoInferiorAZero();
 
-    procedure GerarExcecaoPrecoSugeridoIgualZero();
-    procedure GerarExcecaoPrecoSugeridoInferiorAZero();
-
   protected
     procedure SetUp; override;
     procedure TearDown; override;
@@ -188,8 +185,6 @@ type
     // Falhas
     procedure DeveFalharQuandoOValorCustoFinalForIgualAZero();
     procedure DeveFalharQuandoOValorCustoFinalForInferiorAZero();
-    procedure DeveFalharQuandoPrecoSugeridoForIgualAZero();
-    procedure DeveFalharQuandoPrecoSugeridoForInferiorAZero();
 
   end;
 
@@ -1458,26 +1453,6 @@ begin
                   .SubtrairIPI()
                   .ComAliquota(60)
                   .Calcular();
-end;
-
-procedure TComposicaoPrecoTeste.DeveFalharQuandoPrecoSugeridoForIgualAZero;
-begin
-
-end;
-
-procedure TComposicaoPrecoTeste.DeveFalharQuandoPrecoSugeridoForInferiorAZero;
-begin
-
-end;
-
-procedure TComposicaoPrecoTeste.GerarExcecaoPrecoSugeridoIgualZero;
-begin
-
-end;
-
-procedure TComposicaoPrecoTeste.GerarExcecaoPrecoSugeridoInferiorAZero;
-begin
-
 end;
 
 initialization

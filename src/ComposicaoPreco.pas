@@ -98,6 +98,9 @@ type
   ECustoFinalInvalido = class(Exception)
   end;
 
+  EPrecoSugeridoInvalido = class(Exception)
+  end;
+
   TComposicaoPreco = class(TInterfacedObject, IComposicaoPreco)
   private
     FAliquotaICMSCompra: double;
