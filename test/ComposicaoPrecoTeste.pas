@@ -70,6 +70,8 @@ type
     procedure DeveCalcularAliquotaMarkupZeroQuandoDesconsiderarAliquotaICMSCompraECustoFor100();
     procedure DeveCalcularAliquotaLucroZeroQuandoDesconsiderarAliquotaICMSCompraECustoFor100();
 
+    procedure DeveCalcularValorICMSCompra15QuandoAliquotaICMSCompraFor15ECustoFor100();
+
     // Somente IPI
     procedure DeveCalcularPrecoSugerido90QuandoSubtrairAliquotaIPIDe10ECustoFor100();
     procedure DeveCalcularPrecoSugerido180QuandoSubtrairAliquotaIPIDe10ECustoFor200();
@@ -83,6 +85,8 @@ type
     procedure DeveCalcularAliquotaLucroZeroQuandoSomarAliquotaIPIDe10ECustoFor100();
     procedure DeveCalcularAliquotaMarkupZeroQuandoDesconsiderarAliquotaIPIECustoFor100();
     procedure DeveCalcularAliquotaLucroZeroQuandoDesconsiderarAliquotaIPIECustoFor100();
+
+    procedure DeveCalcularValorIPI15QuandoAliquotaIPIFor15ECustoFor100();
 
     // Somente PIS
     procedure DeveCalcularPrecoSugerido90QuandoSubtrairAliquotaPISDe10ECustoFor100();
@@ -98,6 +102,8 @@ type
     procedure DeveCalcularAliquotaMarkupZeroQuandoDesconsiderarAliquotaPISECustoFor100();
     procedure DeveCalcularAliquotaLucroZeroQuandoDesconsiderarAliquotaPISECustoFor100();
 
+    procedure DeveCalcularValorPIS15QuandoAliquotaPISFor15ECustoFor100();
+
     // Somente COFINS
     procedure DeveCalcularPrecoSugerido90QuandoSubtrairAliquotaCOFINSDe10ECustoFor100();
     procedure DeveCalcularPrecoSugerido180QuandoSubtrairAliquotaCOFINSDe10ECustoFor200();
@@ -111,6 +117,8 @@ type
     procedure DeveCalcularAliquotaLucroZeroQuandoSomarAliquotaCOFINSDe10ECustoFor100();
     procedure DeveCalcularAliquotaMarkupZeroQuandoDesconsiderarAliquotaCOFINSECustoFor100();
     procedure DeveCalcularAliquotaLucroZeroQuandoDesconsiderarAliquotaCOFINSECustoFor100();
+
+    procedure DeveCalcularValorCOFINS15QuandoAliquotaCOFINSFor15ECustoFor100();
 
     // Somente Outros
     procedure DeveCalcularPrecoSugerido90QuandoSubtrairAliquotaOutrosDe10ECustoFor100();
@@ -126,6 +134,8 @@ type
     procedure DeveCalcularAliquotaMarkupZeroQuandoDesconsiderarAliquotaOutrosECustoFor100();
     procedure DeveCalcularAliquotaLucroZeroQuandoDesconsiderarAliquotaOutrosECustoFor100();
 
+    procedure DeveCalcularValorOutros15QuandoAliquotaOutrosFor15ECustoFor100();
+
     // Somente Substituição tributária
     procedure DeveCalcularPrecoSugerido90QuandoSubtrairAliquotaSubstituicaoTributariaDe10ECustoFor100();
     procedure DeveCalcularPrecoSugerido180QuandoSubtrairAliquotaSubstituicaoTributariaDe10ECustoFor200();
@@ -139,6 +149,8 @@ type
     procedure DeveCalcularAliquotaLucroZeroQuandoSomarAliquotaSubstituicaoTributariaDe10ECustoFor100();
     procedure DeveCalcularAliquotaMarkupZeroQuandoDesconsiderarAliquotaSubstituicaoTributariaECustoFor100();
     procedure DeveCalcularAliquotaLucroZeroQuandoDesconsiderarAliquotaSubstituicaoTributariaECustoFor100();
+
+    procedure DeveCalcularValorSubstituicaoTributaria15QuandoAliquotaSubstituicaoTributariaFor15ECustoFor100();
 
     // Somente valor operacional
     procedure DeveCalcularPrecoSugerido123QuandoSubtrairValorOperacionalDe7ECustoFor130();
@@ -165,6 +177,8 @@ type
     procedure DeveCalcularAliquotaLucroZeroQuandoSubtrairAliquotaICMSVendaDe10ECustoFor100();
     procedure DeveCalcularAliquotaLucroZeroQuandoSomarAliquotaICMSVendaDe10ECustoFor100();
     procedure DeveCalcularAliquotaLucroZeroQuandoDesconsiderarAliquotaICMSVendaECustoFor100();
+
+    procedure DeveCalcularValorICMSVenda15QuandoAliquotaICMSVendaFor15ECustoFor100();
 
     // Cálculo por lucro
     procedure DeveCalcularAliquotaMarkup11E11QuandoCalcularPorAliquotaLucroDe10ECustoFor100;
@@ -1453,6 +1467,76 @@ begin
                   .SubtrairIPI()
                   .ComAliquota(60)
                   .Calcular();
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularValorCOFINS15QuandoAliquotaCOFINSFor15ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .UtilizarNumeroDeCasasDecimais(2)
+                  .SomarCOFINS()
+                  .ComAliquota(15);
+
+  CheckEquals(15, FComposicaoPreco.GetValorCOFINS(), 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularValorICMSCompra15QuandoAliquotaICMSCompraFor15ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .UtilizarNumeroDeCasasDecimais(2)
+                  .SomarICMSCompra()
+                  .ComAliquota(15);
+
+  CheckEquals(15, FComposicaoPreco.GetValorICMSCompra(), 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularValorICMSVenda15QuandoAliquotaICMSVendaFor15ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .UtilizarNumeroDeCasasDecimais(2)
+                  .SomarICMSVenda()
+                  .ComAliquota(15);
+
+  CheckEquals(15, FComposicaoPreco.GetValorICMSVenda(), 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularValorIPI15QuandoAliquotaIPIFor15ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .UtilizarNumeroDeCasasDecimais(2)
+                  .SomarIPI()
+                  .ComAliquota(15);
+
+  CheckEquals(15, FComposicaoPreco.GetValorIPI(), 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularValorOutros15QuandoAliquotaOutrosFor15ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .UtilizarNumeroDeCasasDecimais(2)
+                  .SomarOutros()
+                  .ComAliquota(15);
+
+  CheckEquals(15, FComposicaoPreco.GetValorOutros(), 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularValorPIS15QuandoAliquotaPISFor15ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .UtilizarNumeroDeCasasDecimais(2)
+                  .SomarPIS()
+                  .ComAliquota(15);
+
+  CheckEquals(15, FComposicaoPreco.GetValorPIS(), 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularValorSubstituicaoTributaria15QuandoAliquotaSubstituicaoTributariaFor15ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .UtilizarNumeroDeCasasDecimais(2)
+                  .SomarSubstituicaoTributaria()
+                  .ComAliquota(15);
+
+  CheckEquals(15, FComposicaoPreco.GetValorSubstituicaoTributaria(), 0.001);
 end;
 
 initialization

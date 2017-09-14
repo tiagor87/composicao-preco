@@ -18,36 +18,42 @@ type
     function SubtrairICMSCompra(): IComposicaoPrecoAliquota;
     function GetTipoCalculoAliquotaICMSCompra(): TTipoCalculo;
     function GetAliquotaICMSCompra(): double;
+    function GetValorICMSCompra(): double;
 
     function SomarIPI(): IComposicaoPrecoAliquota;
     function DesconsiderarIPI(): IComposicaoPreco;
     function SubtrairIPI(): IComposicaoPrecoAliquota;
     function GetTipoCalculoAliquotaIPI(): TTipoCalculo;
     function GetAliquotaIPI(): double;
+    function GetValorIPI(): double;
 
     function SomarPIS(): IComposicaoPrecoAliquota;
     function DesconsiderarPIS(): IComposicaoPreco;
     function SubtrairPIS(): IComposicaoPrecoAliquota;
     function GetTipoCalculoAliquotaPIS(): TTipoCalculo;
     function GetAliquotaPIS(): double;
+    function GetValorPIS(): double;
 
     function SomarCOFINS(): IComposicaoPrecoAliquota;
     function DesconsiderarCOFINS(): IComposicaoPreco;
     function SubtrairCOFINS(): IComposicaoPrecoAliquota;
     function GetTipoCalculoAliquotaCOFINS(): TTipoCalculo;
     function GetAliquotaCOFINS(): double;
+    function GetValorCOFINS(): double;
 
     function SomarSubstituicaoTributaria(): IComposicaoPrecoAliquota;
     function DesconsiderarSubstituicaoTributaria(): IComposicaoPreco;
     function SubtrairSubstituicaoTributaria(): IComposicaoPrecoAliquota;
     function GetTipoCalculoAliquotaSubstituicaoTributaria(): TTipoCalculo;
     function GetAliquotaSubstituicaoTributaria(): double;
+    function GetValorSubstituicaoTributaria(): double;
 
     function SomarOutros(): IComposicaoPrecoAliquota;
     function DesconsiderarOutros(): IComposicaoPreco;
     function SubtrairOutros(): IComposicaoPrecoAliquota;
     function GetTipoCalculoAliquotaOutros(): TTipoCalculo;
     function GetAliquotaOutros(): double;
+    function GetValorOutros(): double;
 
     function SomarValorOperacional(): IComposicaoPrecoValor;
     function DesconsiderarValorOperacional(): IComposicaoPreco;
@@ -60,12 +66,14 @@ type
     function SubtrairFrete(): IComposicaoPrecoAliquota;
     function GetTipoCalculoFrete(): TTipoCalculo;
     function GetAliquotaFrete(): double;
+    function GetValorFrete(): double;
 
     function SomarICMSVenda(): IComposicaoPrecoAliquota;
     function DesconsiderarICMSVenda(): IComposicaoPreco;
     function SubtrairICMSVenda(): IComposicaoPrecoAliquota;
     function GetTipoCalculoAliquotaICMSVenda(): TTipoCalculo;
     function GetAliquotaICMSVenda(): double;
+    function GetValorICMSVenda(): double;
 
     function ComCusto(const Value: double): IComposicaoPreco;
     function GetCusto(): double;
@@ -223,6 +231,15 @@ type
 
     function GetAliquotaLucro(): Double;
     function GetAliquotaMarkup(): Double;
+
+    function GetValorFrete: Double;
+    function GetValorICMSVenda: Double;
+    function GetValorIPI: Double;
+    function GetValorOutros: Double;
+    function GetValorPIS: Double;
+    function GetValorSubstituicaoTributaria: Double;
+    function GetValorCOFINS: Double;
+    function GetValorICMSCompra: Double;
 
   end;
 
@@ -777,6 +794,46 @@ begin
   FUtilizarMarkup := false;
   FAliquotaMarkup := 0;
   Result := TComposicaoPrecoAtribuicaoValor.Create(Self, Self.SetAliquotaLucro);
+end;
+
+function TComposicaoPreco.GetValorCOFINS: double;
+begin
+  Result := RoundTo(FCusto * FAliquotaCOFINS / 100, -FNumeroDeCasasDecimais);
+end;
+
+function TComposicaoPreco.GetValorFrete: Double;
+begin
+  Result := RoundTo(FCusto * FAliquotaFrete / 100, -FNumeroDeCasasDecimais);
+end;
+
+function TComposicaoPreco.GetValorICMSVenda: Double;
+begin
+  Result := RoundTo(FCusto * FAliquotaICMSVenda / 100, -FNumeroDeCasasDecimais);
+end;
+
+function TComposicaoPreco.GetValorIPI: Double;
+begin
+  Result := RoundTo(FCusto * FAliquotaIPI / 100, -FNumeroDeCasasDecimais);
+end;
+
+function TComposicaoPreco.GetValorOutros: Double;
+begin
+  Result := RoundTo(FCusto * FAliquotaOutros / 100, -FNumeroDeCasasDecimais);
+end;
+
+function TComposicaoPreco.GetValorPIS: Double;
+begin
+  Result := RoundTo(FCusto * FAliquotaPIS / 100, -FNumeroDeCasasDecimais);
+end;
+
+function TComposicaoPreco.GetValorSubstituicaoTributaria: Double;
+begin
+  Result := RoundTo(FCusto * FAliquotaSubstituicaoTributaria / 100, -FNumeroDeCasasDecimais);
+end;
+
+function TComposicaoPreco.GetValorICMSCompra: Double;
+begin
+  Result := RoundTo(FCusto * FAliquotaICMSCompra / 100, -FNumeroDeCasasDecimais);
 end;
 
 { TComposicaoPrecoAtribuicaoValor }
