@@ -89,6 +89,8 @@ type
     function UtilizarLucro(): IComposicaoPrecoAliquota;
     function GetAliquotaLucro(): double;
 
+    function GetValorCustoFinal(): double;
+
     function Calcular(): double;
 
   end;
@@ -136,7 +138,8 @@ type
     FAliquotaMarkup: double;
     FAliquotaLucro: double;
 
-    function CalcularValorPorAliquota(pAliquota: Double; pTipoCalculo: TTipoCalculo): Double;
+
+    function CalcularValorPorAliquota(pCusto: Double; pAliquota: Double; pTipoCalculo: TTipoCalculo): Double;
     function CalcularValorICMSCompra(): Double;
     function CalcularValorIPI: Double;
     function CalcularValorPIS: Double;
@@ -144,10 +147,12 @@ type
     function CalcularValorOutros: Double;
     function CalcularValorSubstituicaoTributaria: Double;
     function CalcularValorOperacional: Double;
+    function CalcularValorFrete: Double;
     function CalcularValorICMSVenda(const pValorCusto: Double): Double;
     function CalcularValorLucro(const pValorCusto: Double): Double;
     function CalcularValorMarkup(const pValorCusto: Double): Double;
     function CalcularCustoTotal(): Double;
+    function CalcularCustoFinal(): Double;
     function CalcularAliquotaLucroAPartirDoMarkup(const pValorCusto: Double): Double;
     function ConverterAliquotaMarkupParaCalculo(): Double;
 
@@ -240,6 +245,7 @@ type
     function GetValorSubstituicaoTributaria: Double;
     function GetValorCOFINS: Double;
     function GetValorICMSCompra: Double;
+    function GetValorCustoFinal: Double;
 
   end;
 
@@ -267,22 +273,15 @@ type
 
 function TComposicaoPreco.Calcular: Double;
 begin
-  Result := Self.CalcularCustoTotal();
+  Result := Self.CalcularCustoFinal();
   Result := Result + Self.CalcularValorLucro(Result);
   Result := Result + Self.CalcularValorMarkup(Result);
   Result := RoundTo(Result, -FNumeroDeCasasDecimais);
 end;
 
-function TComposicaoPreco.CalcularCustoTotal(): Double;
+function TComposicaoPreco.CalcularCustoFinal(): Double;
 begin
-  Result := FCusto
-    + Self.CalcularValorICMSCompra()
-    + Self.CalcularValorIPI()
-    + Self.CalcularValorPIS()
-    + Self.CalcularValorCOFINS()
-    + Self.CalcularValorOutros()
-    + Self.CalcularValorSubstituicaoTributaria()
-    + Self.CalcularValorOperacional();
+  Result := Self.CalcularCustoTotal();
 
   Result := Result + Self.CalcularValorICMSVenda(Result);
 
@@ -292,7 +291,7 @@ begin
   end;
 end;
 
-function TComposicaoPreco.CalcularValorPorAliquota(pAliquota: Double; pTipoCalculo: TTipoCalculo): Double;
+function TComposicaoPreco.CalcularValorPorAliquota(pCusto: Double; pAliquota: Double; pTipoCalculo: TTipoCalculo): Double;
 begin
   if ((pAliquota <= 0) or (pTipoCalculo = tcDesconsiderar)) then
   begin
@@ -300,39 +299,48 @@ begin
     Exit;
   end;
 
-  Result := FCusto * pAliquota / 100;
+  Result := pCusto * pAliquota / 100;
   if (pTipoCalculo = tcSubtrair) then
     Result := -Result;
 end;
 
 function TComposicaoPreco.CalcularValorICMSCompra: Double;
 begin
-  Result := Self.CalcularValorPorAliquota(FAliquotaICMSCompra, FTipoCalculoAliquotaICMSCompra);
+  Result := Self.CalcularValorPorAliquota(FCusto, FAliquotaICMSCompra, FTipoCalculoAliquotaICMSCompra);
 end;
 
 function TComposicaoPreco.CalcularValorIPI: Double;
 begin
-  Result := Self.CalcularValorPorAliquota(FAliquotaIPI, FTipoCalculoAliquotaIPI);
+  Result := Self.CalcularValorPorAliquota(FCusto, FAliquotaIPI, FTipoCalculoAliquotaIPI);
 end;
 
 function TComposicaoPreco.CalcularValorPIS: Double;
 begin
-  Result := Self.CalcularValorPorAliquota(FAliquotaPIS, FTipoCalculoAliquotaPIS);
+  Result := Self.CalcularValorPorAliquota(FCusto + Self.CalcularValorIPI(), FAliquotaPIS, FTipoCalculoAliquotaPIS);
 end;
 
 function TComposicaoPreco.CalcularValorCOFINS: Double;
 begin
-  Result := Self.CalcularValorPorAliquota(FAliquotaCOFINS, FTipoCalculoAliquotaCOFINS);
+  Result := Self.CalcularValorPorAliquota(FCusto + Self.CalcularValorIPI(), FAliquotaCOFINS, FTipoCalculoAliquotaCOFINS);
 end;
 
 function TComposicaoPreco.CalcularValorOutros: Double;
 begin
-  Result := Self.CalcularValorPorAliquota(FAliquotaOutros, FTipoCalculoAliquotaOutros);
+  Result := Self.CalcularValorPorAliquota(FCusto, FAliquotaOutros, FTipoCalculoAliquotaOutros);
+end;
+
+function TComposicaoPreco.CalcularValorFrete: Double;
+begin
+  Result := Self.CalcularValorPorAliquota(FCusto
+                                          + Self.CalcularValorIPI()
+                                          + Self.CalcularValorSubstituicaoTributaria(),
+                                          FAliquotaFrete,
+                                          FTipoCalculoFrete);
 end;
 
 function TComposicaoPreco.CalcularValorSubstituicaoTributaria: Double;
 begin
-  Result := Self.CalcularValorPorAliquota(FAliquotaSubstituicaoTributaria, FTipoCalculoAliquotaSubstituicaoTributaria);
+  Result := Self.CalcularValorPorAliquota(FCusto + Self.CalcularValorIPI(), FAliquotaSubstituicaoTributaria, FTipoCalculoAliquotaSubstituicaoTributaria);
 end;
 
 function TComposicaoPreco.CalcularValorOperacional: Double;
@@ -357,7 +365,7 @@ begin
     Exit;
   end;
 
-  Result := pValorCusto / (1 - FAliquotaICMSVenda / 100) - pValorCusto;
+  Result := pValorCusto / (1 - (FAliquotaICMSVenda / 100 + FAliquotaLucro / 100)) * FAliquotaICMSVenda / 100;
   if (FTipoCalculoICMSVenda = tcSubtrair) then
     Result := -Result;
 end;
@@ -412,7 +420,7 @@ function TComposicaoPreco.ComPrecoSugerido(const Value: double): IComposicaoPrec
 var
   lCustoTotal: Double;
 begin
-  lCustoTotal := Self.CalcularCustoTotal();
+  lCustoTotal := Self.CalcularCustoFinal();
   FUtilizarMarkup := true;
   FAliquotaMarkup := Value * 100 / lCustoTotal - 100;
   FAliquotaLucro := Self.CalcularAliquotaLucroAPartirDoMarkup(lCustoTotal);
@@ -798,42 +806,60 @@ end;
 
 function TComposicaoPreco.GetValorCOFINS: double;
 begin
-  Result := RoundTo(FCusto * FAliquotaCOFINS / 100, -FNumeroDeCasasDecimais);
+  Result := RoundTo(Abs(Self.CalcularValorCOFINS()), -FNumeroDeCasasDecimais);
 end;
 
 function TComposicaoPreco.GetValorFrete: Double;
 begin
-  Result := RoundTo(FCusto * FAliquotaFrete / 100, -FNumeroDeCasasDecimais);
+  Result := RoundTo(Abs(Self.CalcularValorFrete()), -FNumeroDeCasasDecimais);
 end;
 
 function TComposicaoPreco.GetValorICMSVenda: Double;
 begin
-  Result := RoundTo(FCusto * FAliquotaICMSVenda / 100, -FNumeroDeCasasDecimais);
+  Result := RoundTo(Self.CalcularValorICMSVenda(Self.CalcularCustoTotal()), -FNumeroDeCasasDecimais);
 end;
 
 function TComposicaoPreco.GetValorIPI: Double;
 begin
-  Result := RoundTo(FCusto * FAliquotaIPI / 100, -FNumeroDeCasasDecimais);
+  Result := RoundTo(Abs(Self.CalcularValorIPI()), -FNumeroDeCasasDecimais);
 end;
 
 function TComposicaoPreco.GetValorOutros: Double;
 begin
-  Result := RoundTo(FCusto * FAliquotaOutros / 100, -FNumeroDeCasasDecimais);
+  Result := RoundTo(Abs(Self.CalcularValorOutros()), -FNumeroDeCasasDecimais);
 end;
 
 function TComposicaoPreco.GetValorPIS: Double;
 begin
-  Result := RoundTo(FCusto * FAliquotaPIS / 100, -FNumeroDeCasasDecimais);
+  Result := RoundTo(Abs(Self.CalcularValorPIS()), -FNumeroDeCasasDecimais);
 end;
 
 function TComposicaoPreco.GetValorSubstituicaoTributaria: Double;
 begin
-  Result := RoundTo(FCusto * FAliquotaSubstituicaoTributaria / 100, -FNumeroDeCasasDecimais);
+  Result := RoundTo(Abs(Self.CalcularValorSubstituicaoTributaria()), -FNumeroDeCasasDecimais);
 end;
 
 function TComposicaoPreco.GetValorICMSCompra: Double;
 begin
-  Result := RoundTo(FCusto * FAliquotaICMSCompra / 100, -FNumeroDeCasasDecimais);
+  Result := RoundTo(Abs(Self.CalcularValorICMSCompra()), -FNumeroDeCasasDecimais);
+end;
+
+function TComposicaoPreco.GetValorCustoFinal: Double;
+begin
+  Result := RoundTo(Self.CalcularCustoFinal(), -FNumeroDeCasasDecimais);
+end;
+
+function TComposicaoPreco.CalcularCustoTotal: Double;
+begin
+  Result := FCusto
+    + Self.CalcularValorICMSCompra()
+    + Self.CalcularValorIPI()
+    + Self.CalcularValorPIS()
+    + Self.CalcularValorCOFINS()
+    + Self.CalcularValorOutros()
+    + Self.CalcularValorFrete()
+    + Self.CalcularValorSubstituicaoTributaria()
+    + Self.CalcularValorOperacional();
 end;
 
 { TComposicaoPrecoAtribuicaoValor }

@@ -103,6 +103,7 @@ type
     procedure DeveCalcularAliquotaLucroZeroQuandoDesconsiderarAliquotaPISECustoFor100();
 
     procedure DeveCalcularValorPIS15QuandoAliquotaPISFor15ECustoFor100();
+    procedure DeveCalcularValorPIS11QuandoAliquotaPISFor10AliquotaIPI10ECustoFor100();
 
     // Somente COFINS
     procedure DeveCalcularPrecoSugerido90QuandoSubtrairAliquotaCOFINSDe10ECustoFor100();
@@ -119,6 +120,7 @@ type
     procedure DeveCalcularAliquotaLucroZeroQuandoDesconsiderarAliquotaCOFINSECustoFor100();
 
     procedure DeveCalcularValorCOFINS15QuandoAliquotaCOFINSFor15ECustoFor100();
+    procedure DeveCalcularValorCOFINS11QuandoAliquotaCOFINSFor10AliquotaIPI10ECustoFor100();
 
     // Somente Outros
     procedure DeveCalcularPrecoSugerido90QuandoSubtrairAliquotaOutrosDe10ECustoFor100();
@@ -135,6 +137,7 @@ type
     procedure DeveCalcularAliquotaLucroZeroQuandoDesconsiderarAliquotaOutrosECustoFor100();
 
     procedure DeveCalcularValorOutros15QuandoAliquotaOutrosFor15ECustoFor100();
+    procedure DeveCalcularValorOutros10QuandoAliquotaOutrosFor10AliquotaIPI10ECustoFor100();
 
     // Somente Substituição tributária
     procedure DeveCalcularPrecoSugerido90QuandoSubtrairAliquotaSubstituicaoTributariaDe10ECustoFor100();
@@ -151,6 +154,7 @@ type
     procedure DeveCalcularAliquotaLucroZeroQuandoDesconsiderarAliquotaSubstituicaoTributariaECustoFor100();
 
     procedure DeveCalcularValorSubstituicaoTributaria15QuandoAliquotaSubstituicaoTributariaFor15ECustoFor100();
+    procedure DeveCalcularValorSubstituicaoTributaria11QuandoAliquotaSubstituicaoTributariaFor10AliquotaIPI10ECustoFor100();
 
     // Somente valor operacional
     procedure DeveCalcularPrecoSugerido123QuandoSubtrairValorOperacionalDe7ECustoFor130();
@@ -163,6 +167,25 @@ type
     procedure DeveCalcularAliquotaLucroZeroQuandoSubtrairValorOperacionalDe7ECustoFor130();
     procedure DeveCalcularAliquotaLucroZeroQuandoSomarValorOperacionalDe7ECustoFor130();
     procedure DeveCalcularAliquotaLucroZeroQuandoDesconsiderarValorOperacionalECustoFor130();
+
+    // Frete
+    procedure DeveCalcularPrecoSugerido90QuandoSubtrairAliquotaFreteDe10ECustoFor100();
+    procedure DeveCalcularPrecoSugerido180QuandoSubtrairAliquotaFreteDe10ECustoFor200();
+    procedure DeveCalcularPrecoSugerido110QuandoSomarAliquotaFreteDe10ECustoFor100();
+    procedure DeveCalcularPrecoSugerido220QuandoSomarAliquotaFreteDe10ECustoFor200();
+    procedure DeveCalcularPrecoSugerido100QuandoDesconsiderarAliquotaFreteECustoFor100();
+
+    procedure DeveCalcularAliquotaMarkupZeroQuandoSubtrairAliquotaFreteDe10ECustoFor100();
+    procedure DeveCalcularAliquotaLucroZeroQuandoSubtrairAliquotaFreteDe10ECustoFor100();
+    procedure DeveCalcularAliquotaMarkupZeroQuandoSomarAliquotaFreteDe10ECustoFor100();
+    procedure DeveCalcularAliquotaLucroZeroQuandoSomarAliquotaFreteDe10ECustoFor100();
+    procedure DeveCalcularAliquotaMarkupZeroQuandoDesconsiderarAliquotaFreteECustoFor100();
+    procedure DeveCalcularAliquotaLucroZeroQuandoDesconsiderarAliquotaFreteECustoFor100();
+
+    procedure DeveCalcularValorFrete15QuandoAliquotaFreteFor15ECustoFor100();
+    procedure DeveCalcularValorFrete11QuandoAliquotaFreteFor10AliquotaIPI10ECustoFor100();
+    procedure DeveCalcularValorFrete11QuandoAliquotaFreteFor10AliquotaSubstituicaoTributaria10ECustoFor100();
+
 
     // Somente ICMS de venda
     procedure DeveCalcularPrecoSugerido111E11QuandoSomarAliquotaICMSVendaDe10ECustoFor100();
@@ -178,7 +201,11 @@ type
     procedure DeveCalcularAliquotaLucroZeroQuandoSomarAliquotaICMSVendaDe10ECustoFor100();
     procedure DeveCalcularAliquotaLucroZeroQuandoDesconsiderarAliquotaICMSVendaECustoFor100();
 
-    procedure DeveCalcularValorICMSVenda15QuandoAliquotaICMSVendaFor15ECustoFor100();
+    procedure DeveCalcularValorICMSVenda17E65QuandoAliquotaICMSVendaFor15ECustoFor100();
+    procedure DeveCalcularValorICMSVenda12e22QuandoAliquotaICMSVendaFor10AliquotaIPI10ECustoFor100();
+    procedure DeveCalcularValorICMSVenda12e22QuandoAliquotaICMSVendaFor10AliquotaSubstituicaoTributariaFor10ECustoFor100();
+
+    procedure DeveCalcularValorICMSVenda12E50QuandoAliquotaICMSVendaFor10EAliquotaLucroFor10ECustoFor100();
 
     // Cálculo por lucro
     procedure DeveCalcularAliquotaMarkup11E11QuandoCalcularPorAliquotaLucroDe10ECustoFor100;
@@ -199,6 +226,8 @@ type
     // Falhas
     procedure DeveFalharQuandoOValorCustoFinalForIgualAZero();
     procedure DeveFalharQuandoOValorCustoFinalForInferiorAZero();
+
+    procedure DeveCalcularPrecoSugeridol126E44ECustoFinal113E79DeAcordoComParametrosECustoFor100();
 
   end;
 
@@ -1489,14 +1518,14 @@ begin
   CheckEquals(15, FComposicaoPreco.GetValorICMSCompra(), 0.001);
 end;
 
-procedure TComposicaoPrecoTeste.DeveCalcularValorICMSVenda15QuandoAliquotaICMSVendaFor15ECustoFor100;
+procedure TComposicaoPrecoTeste.DeveCalcularValorICMSVenda17E65QuandoAliquotaICMSVendaFor15ECustoFor100;
 begin
   FComposicaoPreco.ComCusto(100)
                   .UtilizarNumeroDeCasasDecimais(2)
                   .SomarICMSVenda()
                   .ComAliquota(15);
 
-  CheckEquals(15, FComposicaoPreco.GetValorICMSVenda(), 0.001);
+  CheckEquals(17.65, FComposicaoPreco.GetValorICMSVenda(), 0.001);
 end;
 
 procedure TComposicaoPrecoTeste.DeveCalcularValorIPI15QuandoAliquotaIPIFor15ECustoFor100;
@@ -1537,6 +1566,264 @@ begin
                   .ComAliquota(15);
 
   CheckEquals(15, FComposicaoPreco.GetValorSubstituicaoTributaria(), 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularPrecoSugeridol126E44ECustoFinal113E79DeAcordoComParametrosECustoFor100;
+var
+  lResultado: double;
+begin
+  lResultado := FComposicaoPreco.ComCusto(100)
+                                .UtilizarNumeroDeCasasDecimais(2)
+                                .SubtrairICMSCompra()
+                                .ComAliquota(15)
+                                .SomarIPI()
+                                .ComAliquota(10)
+                                .SubtrairPIS()
+                                .ComAliquota(20)
+                                .SubtrairCOFINS()
+                                .ComAliquota(10)
+                                .SomarOutros()
+                                .ComAliquota(10)
+                                .SomarSubstituicaoTributaria()
+                                .ComAliquota(15)
+                                .SomarFrete()
+                                .ComAliquota(10)
+                                .SomarICMSVenda()
+                                .ComAliquota(10)
+                                .UtilizarLucro()
+                                .ComAliquota(10)
+                                .Calcular();
+  CheckEquals(113.79, FComposicaoPreco.GetValorCustoFinal(), 0.001);
+  CheckEquals(126.44, lResultado, 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaLucroZeroQuandoDesconsiderarAliquotaFreteECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .DesconsiderarFrete()
+                  .Calcular();
+  CheckEquals(0, FComposicaoPreco.GetAliquotaLucro());
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaLucroZeroQuandoSomarAliquotaFreteDe10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .SomarFrete()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(0, FComposicaoPreco.GetAliquotaLucro());
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaLucroZeroQuandoSubtrairAliquotaFreteDe10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .SubtrairFrete()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(0, FComposicaoPreco.GetAliquotaLucro());
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaMarkupZeroQuandoDesconsiderarAliquotaFreteECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .DesconsiderarFrete()
+                  .Calcular();
+  CheckEquals(0, FComposicaoPreco.GetAliquotaMarkup());
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaMarkupZeroQuandoSomarAliquotaFreteDe10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .SomarFrete()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(0, FComposicaoPreco.GetAliquotaMarkup());
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularAliquotaMarkupZeroQuandoSubtrairAliquotaFreteDe10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .SubtrairFrete()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(0, FComposicaoPreco.GetAliquotaMarkup());
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularPrecoSugerido100QuandoDesconsiderarAliquotaFreteECustoFor100;
+var
+  lResultado: double;
+begin
+  lResultado := FComposicaoPreco.ComCusto(100)
+                                .UtilizarNumeroDeCasasDecimais(2)
+                                .DesconsiderarFrete()
+                                .Calcular();
+  CheckEquals(100, lResultado, 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularPrecoSugerido110QuandoSomarAliquotaFreteDe10ECustoFor100;
+var
+  lResultado: double;
+begin
+  lResultado := FComposicaoPreco.ComCusto(100)
+                                .UtilizarNumeroDeCasasDecimais(2)
+                                .SomarFrete()
+                                .ComAliquota(10)
+                                .Calcular();
+  CheckEquals(110, lResultado, 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularPrecoSugerido180QuandoSubtrairAliquotaFreteDe10ECustoFor200;
+var
+  lResultado: double;
+begin
+  lResultado := FComposicaoPreco.ComCusto(200)
+                                .UtilizarNumeroDeCasasDecimais(2)
+                                .SubtrairFrete()
+                                .ComAliquota(10)
+                                .Calcular();
+  CheckEquals(180, lResultado, 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularPrecoSugerido220QuandoSomarAliquotaFreteDe10ECustoFor200;
+var
+  lResultado: double;
+begin
+  lResultado := FComposicaoPreco.ComCusto(200)
+                                .UtilizarNumeroDeCasasDecimais(2)
+                                .SomarFrete()
+                                .ComAliquota(10)
+                                .Calcular();
+  CheckEquals(220, lResultado, 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularPrecoSugerido90QuandoSubtrairAliquotaFreteDe10ECustoFor100;
+var
+  lResultado: double;
+begin
+  lResultado := FComposicaoPreco.ComCusto(100)
+                                .UtilizarNumeroDeCasasDecimais(2)
+                                .SubtrairFrete()
+                                .ComAliquota(10)
+                                .Calcular();
+  CheckEquals(90, lResultado, 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularValorCOFINS11QuandoAliquotaCOFINSFor10AliquotaIPI10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .UtilizarNumeroDeCasasDecimais(2)
+                  .SomarIPI()
+                  .ComAliquota(10)
+                  .SomarCOFINS()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(11, FComposicaoPreco.GetValorCOFINS(), 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularValorFrete11QuandoAliquotaFreteFor10AliquotaIPI10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .UtilizarNumeroDeCasasDecimais(2)
+                  .SomarIPI()
+                  .ComAliquota(10)
+                  .SomarFrete()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(11, FComposicaoPreco.GetValorFrete(), 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularValorFrete11QuandoAliquotaFreteFor10AliquotaSubstituicaoTributaria10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .UtilizarNumeroDeCasasDecimais(2)
+                  .SomarSubstituicaoTributaria()
+                  .ComAliquota(10)
+                  .SomarFrete()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(11, FComposicaoPreco.GetValorFrete(), 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularValorFrete15QuandoAliquotaFreteFor15ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .UtilizarNumeroDeCasasDecimais(2)
+                  .SomarFrete()
+                  .ComAliquota(15)
+                  .Calcular();
+  CheckEquals(15, FComposicaoPreco.GetValorFrete(), 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularValorICMSVenda12e22QuandoAliquotaICMSVendaFor10AliquotaIPI10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .UtilizarNumeroDeCasasDecimais(2)
+                  .SomarIPI()
+                  .ComAliquota(10)
+                  .SomarICMSVenda()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(12.22, FComposicaoPreco.GetValorICMSVenda(), 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularValorICMSVenda12e22QuandoAliquotaICMSVendaFor10AliquotaSubstituicaoTributariaFor10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .UtilizarNumeroDeCasasDecimais(2)
+                  .SomarSubstituicaoTributaria()
+                  .ComAliquota(10)
+                  .SomarICMSVenda()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(12.22, FComposicaoPreco.GetValorICMSVenda(), 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularValorOutros10QuandoAliquotaOutrosFor10AliquotaIPI10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .UtilizarNumeroDeCasasDecimais(2)
+                  .SomarIPI()
+                  .ComAliquota(10)
+                  .SomarOutros()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(10, FComposicaoPreco.GetValorOutros(), 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularValorPIS11QuandoAliquotaPISFor10AliquotaIPI10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .UtilizarNumeroDeCasasDecimais(2)
+                  .SomarIPI()
+                  .ComAliquota(10)
+                  .SomarPIS()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(11, FComposicaoPreco.GetValorPIS(), 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularValorSubstituicaoTributaria11QuandoAliquotaSubstituicaoTributariaFor10AliquotaIPI10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .UtilizarNumeroDeCasasDecimais(2)
+                  .SomarIPI()
+                  .ComAliquota(10)
+                  .SomarSubstituicaoTributaria()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(11, FComposicaoPreco.GetValorSubstituicaoTributaria(), 0.001);
+end;
+
+procedure TComposicaoPrecoTeste.DeveCalcularValorICMSVenda12E50QuandoAliquotaICMSVendaFor10EAliquotaLucroFor10ECustoFor100;
+begin
+  FComposicaoPreco.ComCusto(100)
+                  .UtilizarNumeroDeCasasDecimais(2)
+                  .SomarICMSVenda()
+                  .ComAliquota(10)
+                  .UtilizarLucro()
+                  .ComAliquota(10)
+                  .Calcular();
+  CheckEquals(12.50, FComposicaoPreco.GetValorICMSVenda(), 0.001);
 end;
 
 initialization
