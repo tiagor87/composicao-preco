@@ -8,6 +8,15 @@ uses
 type
   TTipoCalculo = (tcSomar, tcDesconsiderar, tcSubtrair);
 
+  ECustoFinalInvalido = class(Exception)
+  end;
+
+  EPrecoSugeridoInvalido = class(Exception)
+  end;
+
+  ECustoInicialInvalido = class(Exception)
+  end;
+
   IComposicaoPrecoAliquota = interface;
   IComposicaoPrecoValor = interface;
 
@@ -103,12 +112,6 @@ type
   IComposicaoPrecoValor = interface
   ['{AE5A8692-654C-4D0D-9C21-C90685571D1E}']
     function ComValor(pValor: double): IComposicaoPreco;
-  end;
-
-  ECustoFinalInvalido = class(Exception)
-  end;
-
-  EPrecoSugeridoInvalido = class(Exception)
   end;
 
   TComposicaoPreco = class(TInterfacedObject, IComposicaoPreco)
@@ -281,6 +284,13 @@ end;
 
 function TComposicaoPreco.CalcularCustoFinal(): Double;
 begin
+  Result := 0;
+  
+  if (FCusto <= 0) then
+  begin
+    raise ECustoInicialInvalido.Create(Format('O custo inicial está com o valor de %f e deveria ser maior que zero.', [RoundTo(Result, -2)]));
+  end;
+
   Result := Self.CalcularCustoTotal();
 
   Result := Result + Self.CalcularValorICMSVenda(Result);
@@ -442,6 +452,8 @@ begin
   FTipoCalculoAliquotaOutros := tcSomar;
   FValorOperacional := 0;
   FTipoCalculoValorOperacional := tcSomar;
+  FAliquotaFrete := 0;
+  FTipoCalculoFrete := tcSomar;
 
   FCusto := 0;
   FAliquotaMarkup := 0;
